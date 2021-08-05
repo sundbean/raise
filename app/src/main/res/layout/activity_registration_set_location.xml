@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".RegistrationSetLocationActivity">
+
+    <TextView
+        android:id="@+id/tvRegisterLocationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="What's your location?"
+        android:textAllCaps="true"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLocationInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="This will allow us to find events, fundraisers, and \n groups in your area."
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvRegisterLocationTitle" />
+
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="360dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/search_box_border"
+        android:queryHint="Search Location"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvLocationInfo" />
+
+    <!--TODO: Enable use current location -->
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSetLocation"
+        android:layout_width="330dp"
+        android:layout_height="60dp"
+        android:layout_margin="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Set Location"
+        app:backgroundTint="@color/primary_salmon"
+        app:cornerRadius="50dp"
+        app:iconTint="@color/primary_salmon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchView"
+        app:strokeColor="@color/primary_salmon" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
