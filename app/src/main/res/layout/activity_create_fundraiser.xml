@@ -134,7 +134,7 @@
                     android:drawableStart="@drawable/ic_bank_account"
                     android:inputType="textPersonName"
                     android:hint="Link to Bank Account"
-                    app:layout_constraintBottom_toTopOf="@+id/etDescriptionCF"
+                    app:layout_constraintBottom_toTopOf="@+id/llDescriptionCF"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etMoneyGoalCF" />
