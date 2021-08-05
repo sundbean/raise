@@ -1,17 +1,13 @@
 package com.sundbean.raise
 
 import android.content.Context
-import android.media.Image
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.custom_view.view.*
-import java.net.URI
 
 class RecyclerViewAdapter(private val c : Context, private val causes: MutableList<String>) : RecyclerView.Adapter<RecyclerViewAdapter.ColorViewHolder>() {
 

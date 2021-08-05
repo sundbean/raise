@@ -3,15 +3,15 @@
     android:shape="rectangle">
     <stroke
         android:width="4dp"
-        android:color="@color/primary_navy" />
+        android:color="@color/primary_salmon" />
 
     <solid
-        android:color="@color/primary_navy"
+        android:color="@color/primary_salmon"
 
         />
 
-<!--    // Reduce the corner radius value-->
-<!--    <corners android:radius="10dp" />-->
+    <!--    // Reduce the corner radius value-->
+    <!--    <corners android:radius="10dp" />-->
 
     <padding
         android:left="20dp"

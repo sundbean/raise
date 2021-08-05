@@ -17,10 +17,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:fontFamily="@font/alegreya_sans"
+            android:fontFamily="@font/benchnine_bold"
             android:text="create event"
             android:textAllCaps="true"
-            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,7 +30,7 @@
         <LinearLayout
             android:id="@+id/llFormContainer"
             android:layout_width="409dp"
-            android:layout_height="1000dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
             android:orientation="vertical"
@@ -42,7 +43,7 @@
                 android:id="@+id/llUploadPhotoContainer"
                 android:layout_width="match_parent"
                 android:layout_height="260dp"
-                android:background="@drawable/background_navy_rectangle"
+                android:background="@drawable/background_blue_rectangle"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -93,7 +94,7 @@
                     android:layout_marginTop="8dp"
                     android:ems="10"
                     android:inputType="textPersonName"
-                    android:text="Name"
+                    android:hint="Name"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/spinnerEventType" />
@@ -106,6 +107,7 @@
                     android:layout_marginTop="8dp"
                     android:ems="10"
                     android:inputType="date"
+                    android:hint="Date"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etEventName" />
 
@@ -118,6 +120,7 @@
                     android:layout_marginEnd="7dp"
                     android:ems="7"
                     android:inputType="time"
+                    android:hint="Time"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/etDate"
                     app:layout_constraintTop_toBottomOf="@+id/etEventName" />
@@ -129,6 +132,7 @@
                     android:layout_marginTop="8dp"
                     android:ems="10"
                     android:inputType="textPostalAddress"
+                    android:hint="Location"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etDate" />
@@ -141,6 +145,7 @@
                     android:ems="10"
                     android:gravity="start|top"
                     android:inputType="textMultiLine"
+                    android:hint="Description (500 char max)"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etLocation" />
@@ -152,14 +157,16 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:text="Who is organizing this event?"
+                    android:textColor="@color/black"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etDescription" />
 
                 <RadioGroup
+                    android:id="@+id/radioGroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/tvQuestion1">
 
@@ -175,6 +182,42 @@
                         android:layout_height="wrap_content"
                         android:text="A group I belong to" />
                 </RadioGroup>
+
+                <TextView
+                    android:id="@+id/tvQuestion2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Which cause(s) does this event relate to?"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvChooseEventCauses"
+                    android:layout_width="396dp"
+                    android:layout_height="673dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvQuestion2" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCreateEvent"
+                    android:layout_width="340dp"
+                    android:layout_height="60dp"
+                    android:layout_margin="24dp"
+                    android:layout_marginTop="24dp"
+                    android:text="Create Event"
+                    app:backgroundTint="@color/primary_salmon"
+                    app:cornerRadius="50dp"
+                    app:iconTint="@color/primary_salmon"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rvChooseEventCauses"
+                    app:strokeColor="@color/primary_salmon" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
