@@ -94,7 +94,10 @@
                     android:layout_marginTop="8dp"
                     android:ems="10"
                     android:inputType="textPersonName"
-                    android:hint="Name"
+                    android:drawableLeft="@drawable/ic_star"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_star"
+                    android:hint="Event Name"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/spinnerEventType" />
@@ -107,6 +110,9 @@
                     android:layout_marginTop="8dp"
                     android:ems="10"
                     android:inputType="date"
+                    android:drawableLeft="@drawable/ic_date"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_date"
                     android:hint="Date"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etEventName" />
@@ -120,6 +126,9 @@
                     android:layout_marginEnd="7dp"
                     android:ems="7"
                     android:inputType="time"
+                    android:drawableLeft="@drawable/ic_time"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_time"
                     android:hint="Time"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/etDate"
@@ -132,23 +141,51 @@
                     android:layout_marginTop="8dp"
                     android:ems="10"
                     android:inputType="textPostalAddress"
+                    android:drawableLeft="@drawable/ic_location"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_location"
                     android:hint="Location"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etDate" />
 
-                <EditText
-                    android:id="@+id/etDescription"
+                <LinearLayout
+                    android:id="@+id/llDescriptionCE"
                     android:layout_width="380dp"
-                    android:layout_height="280dp"
+                    android:layout_height="230dp"
                     android:layout_marginTop="8dp"
-                    android:ems="10"
-                    android:gravity="start|top"
-                    android:inputType="textMultiLine"
-                    android:hint="Description (500 char max)"
+                    android:orientation="horizontal"
+                    android:padding="0dp"
+                    android:paddingTop="0dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/etLocation" />
+                    app:layout_constraintTop_toBottomOf="@+id/etLocation">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="description icon"
+                        android:paddingLeft="5dp"
+                        android:paddingTop="11dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="10dp"
+                        android:scaleType="fitStart"
+                        android:src="@drawable/ic_description" />
+
+                    <EditText
+                        android:id="@+id/etDescription"
+                        android:layout_width="350dp"
+                        android:layout_height="220dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@null"
+                        android:ems="10"
+                        android:gravity="start|top"
+                        android:hint=" Description (500 char max)"
+                        android:inputType="textMultiLine"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/etLocation" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvQuestion1"
@@ -159,7 +196,7 @@
                     android:text="Who is organizing this event?"
                     android:textColor="@color/black"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/etDescription" />
+                    app:layout_constraintTop_toBottomOf="@+id/llDescriptionCE" />
 
                 <RadioGroup
                     android:id="@+id/radioGroup"
@@ -180,7 +217,7 @@
                         android:id="@+id/rbGroupOrganizer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="A group I belong to" />
+                        android:text="A group I run" />
                 </RadioGroup>
 
                 <TextView

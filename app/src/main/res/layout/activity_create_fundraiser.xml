@@ -83,6 +83,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:ems="10"
+                    android:drawableLeft="@drawable/ic_star"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_star"
                     android:hint="Fundraiser Name"
                     android:inputType="textPersonName"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -96,6 +99,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:ems="10"
+                    android:drawableLeft="@drawable/ic_location"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_location"
                     android:hint="Location"
                     android:inputType="textPostalAddress"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -109,6 +115,9 @@
                     android:layout_marginTop="8dp"
                     android:ems="10"
                     android:inputType="numberDecimal"
+                    android:drawableLeft="@drawable/ic_dollars"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_dollars"
                     android:hint="Fundraiser Goal Amount"
                     app:layout_constraintBottom_toTopOf="@+id/etBankAccountCF"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -120,6 +129,9 @@
                     android:layout_width="380dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
+                    android:drawableLeft="@drawable/ic_bank_account"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_bank_account"
                     android:inputType="textPersonName"
                     android:hint="Link to Bank Account"
                     app:layout_constraintBottom_toTopOf="@+id/etDescriptionCF"
@@ -127,18 +139,43 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/etMoneyGoalCF" />
 
-                <EditText
-                    android:id="@+id/etDescriptionCF"
+                <LinearLayout
+                    android:id="@+id/llDescriptionCF"
                     android:layout_width="380dp"
-                    android:layout_height="280dp"
+                    android:layout_height="230dp"
                     android:layout_marginTop="8dp"
-                    android:ems="10"
-                    android:gravity="start|top"
-                    android:hint="Description (500 char max)"
-                    android:inputType="textMultiLine"
+                    android:orientation="horizontal"
+                    android:padding="0dp"
+                    android:paddingTop="0dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/etBankAccountCF" />
+                    app:layout_constraintTop_toBottomOf="@+id/etBankAccountCF">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="description icon"
+                        android:paddingLeft="5dp"
+                        android:paddingTop="11dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="10dp"
+                        android:scaleType="fitStart"
+                        android:src="@drawable/ic_description" />
+
+                    <EditText
+                        android:id="@+id/etDescriptionCF"
+                        android:layout_width="350dp"
+                        android:layout_height="220dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@null"
+                        android:ems="10"
+                        android:gravity="start|top"
+                        android:hint=" Description (500 char max)"
+                        android:inputType="textMultiLine"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/etLocation" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvQuestion1CF"
@@ -149,7 +186,7 @@
                     android:text="Who is organizing this fundraiser?"
                     android:textColor="@color/black"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/etDescriptionCF" />
+                    app:layout_constraintTop_toBottomOf="@+id/llDescriptionCF" />
 
                 <RadioGroup
                     android:id="@+id/radioGroupCF"

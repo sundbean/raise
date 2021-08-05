@@ -9,7 +9,7 @@ import android.widget.Spinner
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class CreateFundraiserActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+class CreateFundraiserActivity : AppCompatActivity() {
 
     private lateinit var causesRecyclerView : RecyclerView
 
@@ -31,12 +31,4 @@ class CreateFundraiserActivity : AppCompatActivity(), AdapterView.OnItemSelected
         causesRecyclerView.adapter = RecyclerViewAdapter(this, causes)
     }
 
-    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-        // An item was selected. You can retrieve the selected item with
-        // parent.getItemAtPosition(pos)
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>) {
-        // Another interface callback
-    }
 }
