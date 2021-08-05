@@ -1,18 +1,256 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CreateFundraiserActivity">
+    android:layout_width="match_parent">
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="create fundraiser"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:scrollbarTrackVertical="@drawable/background_navy_rectangle"
+        tools:context=".CreateFundraiserActivity">
+
+        <TextView
+            android:id="@+id/tvCreateFundraiserPageTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/benchnine_bold"
+            android:text="create fundraiser"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/llFormContainerCF"
+            android:layout_width="409dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:padding="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvCreateFundraiserPageTitle">
+
+            <LinearLayout
+                android:id="@+id/llUploadPhotoContainerCF"
+                android:layout_width="match_parent"
+                android:layout_height="260dp"
+                android:background="@drawable/background_pink_rectangle"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/llUploadContentContainerCF"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/ivUploadIconCF"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        app:srcCompat="@drawable/ic_upload_white_foreground" />
+
+                    <TextView
+                        android:id="@+id/tvUploadTextCF"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="Upload Photo"
+                        android:textAlignment="center"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clTextFormCF"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+
+                <EditText
+                    android:id="@+id/etFundraiserName"
+                    android:layout_width="380dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:ems="10"
+                    android:drawableLeft="@drawable/ic_star"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_star"
+                    android:hint="Fundraiser Name"
+                    android:inputType="textPersonName"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.551"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/etLocationCF"
+                    android:layout_width="380dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:ems="10"
+                    android:drawableLeft="@drawable/ic_location"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_location"
+                    android:hint="Location"
+                    android:inputType="textPostalAddress"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/etFundraiserName" />
+
+                <EditText
+                    android:id="@+id/etMoneyGoalCF"
+                    android:layout_width="380dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:drawableLeft="@drawable/ic_dollars"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_dollars"
+                    android:hint="Fundraiser Goal Amount"
+                    app:layout_constraintBottom_toTopOf="@+id/etBankAccountCF"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/etLocationCF" />
+
+                <EditText
+                    android:id="@+id/etBankAccountCF"
+                    android:layout_width="380dp"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:drawableLeft="@drawable/ic_bank_account"
+                    android:drawablePadding="10dp"
+                    android:drawableStart="@drawable/ic_bank_account"
+                    android:inputType="textPersonName"
+                    android:hint="Link to Bank Account"
+                    app:layout_constraintBottom_toTopOf="@+id/llDescriptionCF"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/etMoneyGoalCF" />
+
+                <LinearLayout
+                    android:id="@+id/llDescriptionCF"
+                    android:layout_width="380dp"
+                    android:layout_height="230dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:padding="0dp"
+                    android:paddingTop="0dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/etBankAccountCF">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="description icon"
+                        android:paddingLeft="5dp"
+                        android:paddingTop="11dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="10dp"
+                        android:scaleType="fitStart"
+                        android:src="@drawable/ic_description" />
+
+                    <EditText
+                        android:id="@+id/etDescriptionCF"
+                        android:layout_width="350dp"
+                        android:layout_height="220dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@null"
+                        android:ems="10"
+                        android:gravity="start|top"
+                        android:hint=" Description (500 char max)"
+                        android:inputType="textMultiLine"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/etLocation" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvQuestion1CF"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Who is organizing this fundraiser?"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/llDescriptionCF" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroupCF"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvQuestion1CF">
+
+                    <RadioButton
+                        android:id="@+id/rbUserOrganizerCF"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="I am" />
+
+                    <RadioButton
+                        android:id="@+id/rbGroupOrganizerCF"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="A group I run" />
+                </RadioGroup>
+
+                <TextView
+                    android:id="@+id/tvQuestion2CF"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Which cause(s) does this fundraiser relate to?"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/radioGroupCF" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvChooseFundraiserCauses"
+                    android:layout_width="396dp"
+                    android:layout_height="673dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvQuestion2CF" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCreateFundraiser"
+                    android:layout_width="340dp"
+                    android:layout_height="60dp"
+                    android:layout_margin="24dp"
+                    android:layout_marginTop="24dp"
+                    android:text="Create Fundraiser"
+                    app:backgroundTint="@color/primary_salmon"
+                    app:cornerRadius="50dp"
+                    app:iconTint="@color/primary_salmon"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rvChooseFundraiserCauses"
+                    app:strokeColor="@color/primary_salmon" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
+
