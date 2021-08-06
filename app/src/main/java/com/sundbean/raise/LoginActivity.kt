@@ -39,6 +39,11 @@ class LoginActivity : AppCompatActivity() {
         // underline sign up link
         signUpLink.setPaintFlags(signUpLink.getPaintFlags() or Paint.UNDERLINE_TEXT_FLAG)
 
+        signUpLink.setOnClickListener {
+            val intent = Intent(this@LoginActivity, RegisterAccountActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 //        auth = Firebase.auth
 //

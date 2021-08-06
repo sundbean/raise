@@ -139,7 +139,7 @@
         app:layout_constraintTop_toBottomOf="@+id/etRegisterConfirmPassword" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSetLocation"
+        android:id="@+id/btnCreateAccount"
         android:layout_width="330dp"
         android:layout_height="60dp"
         android:layout_margin="24dp"
