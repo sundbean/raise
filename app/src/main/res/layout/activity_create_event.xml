@@ -87,6 +87,8 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <!-- TODO: Add hint in spinner -->
+
                 <EditText
                     android:id="@+id/etEventName"
                     android:layout_width="380dp"
