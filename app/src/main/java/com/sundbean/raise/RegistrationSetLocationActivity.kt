@@ -13,6 +13,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.ktx.Firebase
 import java.util.*
 
@@ -21,6 +22,7 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
     private lateinit var autocompleteFragment : AutocompleteSupportFragment
     private lateinit var setLocationBtn : Button
     private lateinit var auth: FirebaseAuth
+    private var selectedPlaceId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,12 +47,14 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 // TODO: Get info about the selected place.
-                Log.i(TAG, "Place: ${place.name}, ${place.id}")
+                // using the place id: https://developers.google.com/maps/documentation/places/web-service/place-id
+                selectedPlaceId = place.id
+                Log.i("LocationActivity", "Place: ${place.name}, ${place.id}")
             }
 
             override fun onError(status: Status) {
                 // TODO: Handle the error.
-                Log.i(TAG, "An error occurred: $status")
+                Log.i("Location Activity", "An error occurred: $status")
             }
         })
 
@@ -59,6 +63,7 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
         val placesClient = Places.createClient(this)
 
         setLocationBtn.setOnClickListener {
+            storeLocationInFirebase(selectedPlaceId)
             auth.signOut()
             // since user is signed out, they need to be directed back to LoginActivity
             val logoutIntent = Intent(this, LoginActivity::class.java)
@@ -66,6 +71,19 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
             logoutIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(logoutIntent)
         }
+    }
+
+    private fun storeLocationInFirebase(userPlaceId: String?) {
+        val user = Firebase.auth.currentUser
+        val profileUpdates = userProfileChangeRequest {
+            var location = userPlaceId
+        }
+        user!!.updateProfile(profileUpdates)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("Location", "User profile successfully updated with location.")
+                }
+            }
     }
 
 
