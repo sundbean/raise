@@ -21,6 +21,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_register_account.*
 import java.util.*
@@ -95,17 +97,24 @@ class RegisterAccountActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            TextUtils.isEmpty(etPassword.text.toString().trim { it <= ' ' }) -> {
+            TextUtils.isEmpty(etPassword.text.toString()) -> {
                 Toast.makeText(
                     this@RegisterAccountActivity,
                     "Please enter a password.",
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            TextUtils.isEmpty(etConfirmPassword.text.toString().trim { it <= ' ' }) -> {
+            TextUtils.isEmpty(etConfirmPassword.text.toString()) -> {
                 Toast.makeText(
                     this@RegisterAccountActivity,
                     "Please confirm your password.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            etConfirmPassword.text.toString() !== etPassword.text.toString() -> {
+                Toast.makeText(
+                    this@RegisterAccountActivity,
+                    "Your passwords do not match",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -113,11 +122,8 @@ class RegisterAccountActivity : AppCompatActivity() {
             //TODO: make sure that passwords match each other, if not then make Toast
 
             else -> {
-                val name: String = etFullName.text.toString().trim { it <= ' ' }
                 val email: String = etEmail.text.toString().trim { it <= ' ' }
                 val password: String = etPassword.text.toString().trim { it <= ' ' }
-                val confirmedPassword: String =
-                    etConfirmPassword.text.toString().trim { it <= ' ' }
                 //TODO: store the name and profile photo of the authenticated user
                 FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(
@@ -153,7 +159,10 @@ class RegisterAccountActivity : AppCompatActivity() {
     }
 
     private fun uploadImageToFirebaseStorage() {
-        if (selectedPhotoUri == null) return
+        if (selectedPhotoUri == null) {
+            //TODO: make profile picture optional
+            return
+        }
 
         val filename = UUID.randomUUID().toString()
         val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
@@ -165,7 +174,7 @@ class RegisterAccountActivity : AppCompatActivity() {
                 ref.downloadUrl.addOnSuccessListener {
                     Log.d("RegisterAccountActivity", "File location: $it")
 
-                    saveUserToFirebaseDatabase(it.toString())
+                    saveUserToFirestore(it.toString())
                 }
             }
             .addOnFailureListener {
@@ -173,21 +182,20 @@ class RegisterAccountActivity : AppCompatActivity() {
             }
     }
 
-    private fun saveUserToFirebaseDatabase(profileImageUrl: String) {
+    private fun saveUserToFirestore(profileImageUrl: String) {
         val uid = FirebaseAuth.getInstance().uid ?: ""
-        //TODO: Change this to Firestore
-        val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
+        val db = Firebase.firestore
+        val data = hashMapOf(
+            "name" to etFullName.text.toString().trim(),
+            "profileImageUrl" to profileImageUrl
+        )
 
-        val user = User(uid, etFullName.text.toString(), profileImageUrl)
-
-        ref.setValue(user)
-            .addOnSuccessListener {
-                Log.d("RegisterAccountActivity", "Finally we saved the user to Firebase Database")
+        db.collection("users").document(uid).set(data)
+            .addOnSuccessListener { documentReference ->
+                Log.d("RegisterAccountActivity", "Document added to firestore")
             }
-            .addOnFailureListener {
-                // do some logging here
+            .addOnFailureListener { e ->
+                Log.w("RegisterAccountActivity", "Error adding document", e)
             }
     }
 }
-
-class User(val uid: String, val username: String, val profileImageUrl: String)

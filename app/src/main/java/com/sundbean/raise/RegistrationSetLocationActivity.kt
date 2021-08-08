@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -14,6 +15,7 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
 
@@ -74,16 +76,16 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
     }
 
     private fun storeLocationInFirebase(userPlaceId: String?) {
-        val user = Firebase.auth.currentUser
-        val profileUpdates = userProfileChangeRequest {
-            var location = userPlaceId
+        val db = Firebase.firestore
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Toast.makeText(this, "No signed in user", Toast.LENGTH_SHORT).show()
         }
-        user!!.updateProfile(profileUpdates)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("Location", "User profile successfully updated with location.")
-                }
-            }
+        // Find the user document of the current user
+        if (currentUser != null) {
+            db.collection("users").document(currentUser.uid)
+                .update("location", userPlaceId)
+        }
     }
 
 

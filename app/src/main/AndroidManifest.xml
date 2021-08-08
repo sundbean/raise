@@ -9,13 +9,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Raise">
-        <activity android:name=".RegistrationSetLocationActivity"></activity>
-        <activity android:name=".RegisterAccountActivity" />
+        <activity android:name=".RegistrationSetLocationActivity" android:windowSoftInputMode="adjustPan"></activity>
+        <activity android:name=".RegisterAccountActivity" android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".ChooseCausesActivity" />
-        <activity android:name=".CreateGroupActivity" />
-        <activity android:name=".CreateFundraiserActivity" />
-        <activity android:name=".CreateEventActivity" />
-        <activity android:name=".LoginActivity">
+        <activity android:name=".CreateGroupActivity" android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".CreateFundraiserActivity" android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".CreateEventActivity" android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".LoginActivity" android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,7 +24,6 @@
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".SettingsActivity" />
-
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
