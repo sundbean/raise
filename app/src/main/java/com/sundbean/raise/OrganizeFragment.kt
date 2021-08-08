@@ -14,17 +14,17 @@ class OrganizeFragment:Fragment(R.layout.fragment_organize) {
 
         llCreateEventBtn.setOnClickListener {
             val intent = Intent(activity, CreateEventActivity::class.java)
-            activity!!.startActivity(intent)
+            requireActivity().startActivity(intent)
         }
 
         llCreateFundraiserBtn.setOnClickListener {
             val intent = Intent(activity, CreateFundraiserActivity::class.java)
-            activity!!.startActivity(intent)
+            requireActivity().startActivity(intent)
         }
 
         llCreateGroupBtn.setOnClickListener {
             val intent = Intent(activity, CreateGroupActivity::class.java)
-            activity!!.startActivity(intent)
+            requireActivity().startActivity(intent)
         }
 
     }

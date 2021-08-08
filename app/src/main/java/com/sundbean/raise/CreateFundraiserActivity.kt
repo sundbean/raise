@@ -29,6 +29,9 @@ class CreateFundraiserActivity : AppCompatActivity() {
         }
 
         causesRecyclerView.adapter = RecyclerViewAdapter(this, causes)
+
+        // fixes uneven scrolling issue
+        causesRecyclerView.setNestedScrollingEnabled(false)
     }
 
 }

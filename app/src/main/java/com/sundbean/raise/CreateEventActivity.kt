@@ -42,6 +42,10 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         }
 
         causesRecyclerView.adapter = RecyclerViewAdapter(this, causes)
+
+        // fixes uneven scrolling issue
+        causesRecyclerView.setNestedScrollingEnabled(false)
+
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
