@@ -68,10 +68,8 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
             storeLocationInFirebase(selectedPlaceId)
             auth.signOut()
             // since user is signed out, they need to be directed back to LoginActivity
-            val logoutIntent = Intent(this, LoginActivity::class.java)
-            // clear the whole backstack
-            logoutIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(logoutIntent)
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 

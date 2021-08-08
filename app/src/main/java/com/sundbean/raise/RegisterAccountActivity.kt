@@ -111,7 +111,7 @@ class RegisterAccountActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            etConfirmPassword.text.toString() !== etPassword.text.toString() -> {
+            etConfirmPassword.text.toString() != etPassword.text.toString() -> {
                 Toast.makeText(
                     this@RegisterAccountActivity,
                     "Your passwords do not match",
