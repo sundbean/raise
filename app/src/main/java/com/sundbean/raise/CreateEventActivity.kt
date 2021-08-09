@@ -131,8 +131,6 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
                 Log.d("CreateEventActivity", "I've made it to the performEventCreation() function")
                 performEventCreation()
-                val intent = Intent(this@CreateEventActivity, EventConfirmationActivity::class.java)
-                startActivity(intent)
             }
         }
 
@@ -296,19 +294,23 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     "organizer" to eventOrganizer,
                     "description" to eventDescription,
                     "createdBy" to FirebaseAuth.getInstance().uid,
-                    "attendees" to listOf(userRef)
+                    "attendees" to listOf(userRef.id)
                 )
                 Log.i(TAG, "User reference is: $userRef and uid is ${FirebaseAuth.getInstance().uid}")
                 db.collection("events").add(data)
                     .addOnSuccessListener { documentReference ->
                         Log.d("CreateEventActivity", "Document added to firestore: $documentReference")
                         // add the event to the user's events:
-                        userRef.update("events", FieldValue.arrayUnion(documentReference))
+                        userRef.update("events", FieldValue.arrayUnion(documentReference.id))
                         uploadImageToFirebaseStorage(documentReference)
+                        val intent = Intent(this@CreateEventActivity, EventConfirmationActivity::class.java)
+                        intent.putExtra("event_id", documentReference.id)
+                        startActivity(intent)
                     }
                     .addOnFailureListener { e ->
                         Log.w("CreateEventActivity", "Error adding document", e)
                     }
+
 
             }
 
