@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -38,7 +40,8 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private lateinit var eventOrganizerType : String
     private lateinit var eventOrganizer : String
     private var selectedPhotoUri: Uri? = null
-    private var eventPhotoUrl: String? = null
+    private lateinit var url: String
+//    private lateinit var eventReference: Void
     private val GALLERY_REQUEST_CODE = 1234
     private val TAG = "CreateEventActivity"
 
@@ -54,6 +57,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         etLocation = findViewById(R.id.etLocation)
         etDescription = findViewById(R.id.etDescription)
         rgOrganizer = findViewById(R.id.rgOrganizer)
+        url = ""
 
         // get device screen dimensions and use them to set the event image to 16/9 aspect ratio
         val displayMetrics = DisplayMetrics()
@@ -126,7 +130,6 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 }
 
                 Log.d("CreateEventActivity", "I've made it to the performEventCreation() function")
-                uploadImageToFirebaseStorage()
                 performEventCreation()
                 val intent = Intent(this@CreateEventActivity, EventConfirmationActivity::class.java)
                 startActivity(intent)
@@ -151,7 +154,6 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 if (resultCode == Activity.RESULT_OK) {
                     // retrieve data from intent
                     data?.data?.let { uri ->
-                        ivUploadIcon.setImageResource(0)
                         launchImageCrop(uri)
                     }
                 } else {
@@ -174,6 +176,8 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     }
 
     private fun setImage(uri: Uri?) {
+        // take down the upload icon
+        ivUploadIcon.setImageResource(0)
         // use glide to set the image
         Glide.with(this)
             .load(uri)
@@ -197,7 +201,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         startActivityForResult(intent, GALLERY_REQUEST_CODE)
     }
 
-    private fun uploadImageToFirebaseStorage() {
+    private fun uploadImageToFirebaseStorage(eventRef : DocumentReference) {
         if (selectedPhotoUri == null) {
             //TODO: make profile picture optional
             return
@@ -212,7 +216,9 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
                 ref.downloadUrl.addOnSuccessListener {
                     Log.d(TAG, "File location: $it")
-                    eventPhotoUrl = it.toString()
+                    // this is here because there was no way to assign it.toString() to a variable that would work
+                    // update photoUrl in event
+                    eventRef.update("photoUrl", it.toString())
                 }
             }
             .addOnFailureListener {
@@ -273,11 +279,15 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 val eventLocation: String = etLocation.text.toString().trim()
                 val eventDescription: String = etDescription.text.toString().trim()
 
-                // save to Firestore
+                var currentUserUID = FirebaseAuth.getInstance().uid ?: ""
+                val uid = currentUserUID as String
                 val db = Firebase.firestore
+                var userRef = db.collection("users").document(uid)
+
+                // save event to Firestore events collection
                 val data = hashMapOf(
                     "name" to eventName,
-                    "photo" to eventPhotoUrl,
+                    "photoUrl" to "",
                     "type" to eventType,
                     "date" to eventDate,
                     "time" to eventTime,
@@ -285,11 +295,16 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     "organizerType" to eventOrganizerType,
                     "organizer" to eventOrganizer,
                     "description" to eventDescription,
-                    "createdBy" to FirebaseAuth.getInstance().uid
+                    "createdBy" to FirebaseAuth.getInstance().uid,
+                    "attendees" to listOf(userRef)
                 )
-                db.collection("events").document().set(data)
-                    .addOnSuccessListener {
-                        Log.d("CreateEventActivity", "Document added to firestore")
+                Log.i(TAG, "User reference is: $userRef and uid is ${FirebaseAuth.getInstance().uid}")
+                db.collection("events").add(data)
+                    .addOnSuccessListener { documentReference ->
+                        Log.d("CreateEventActivity", "Document added to firestore: $documentReference")
+                        // add the event to the user's events:
+                        userRef.update("events", FieldValue.arrayUnion(documentReference))
+                        uploadImageToFirebaseStorage(documentReference)
                     }
                     .addOnFailureListener { e ->
                         Log.w("CreateEventActivity", "Error adding document", e)
