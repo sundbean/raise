@@ -121,20 +121,38 @@
                 app:layout_constraintStart_toEndOf="@+id/etDate"
                 app:layout_constraintTop_toBottomOf="@+id/etEventName" />
 
-            <EditText
-                android:id="@+id/etLocation"
+<!--            <EditText-->
+<!--                android:id="@+id/etLocation"-->
+<!--                android:layout_width="380dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="8dp"-->
+<!--                android:drawableStart="@drawable/ic_location"-->
+<!--                android:drawableLeft="@drawable/ic_location"-->
+<!--                android:drawablePadding="10dp"-->
+<!--                android:ems="10"-->
+<!--                android:hint="Location"-->
+<!--                android:inputType="textPostalAddress"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/etDate" />-->
+
+            <FrameLayout
+                android:id="@+id/flLocationEditCE"
                 android:layout_width="380dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_marginTop="8dp"
-                android:drawableStart="@drawable/ic_location"
-                android:drawableLeft="@drawable/ic_location"
-                android:drawablePadding="10dp"
-                android:ems="10"
-                android:hint="Location"
-                android:inputType="textPostalAddress"
+                android:background="@drawable/autocomplete_line"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/etDate" />
+                app:layout_constraintTop_toBottomOf="@+id/etDate">
+
+                <fragment
+                    android:id="@+id/afCreateEvent"
+                    android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="0dp" />
+            </FrameLayout>
 
             <LinearLayout
                 android:id="@+id/llDescriptionCE"
@@ -146,7 +164,7 @@
                 android:paddingTop="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/etLocation">
+                app:layout_constraintTop_toBottomOf="@+id/flLocationEditCE">
 
                 <ImageView
                     android:layout_width="wrap_content"

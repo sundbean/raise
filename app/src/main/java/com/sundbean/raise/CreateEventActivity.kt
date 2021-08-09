@@ -14,6 +14,11 @@ import android.widget.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.gms.common.api.Status
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
@@ -28,11 +33,13 @@ import java.util.*
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private lateinit var causesRecyclerView : RecyclerView
+    private lateinit var autocompleteFragment : AutocompleteSupportFragment
+    private var selectedPlaceId: String? = null
     private var eventType : String? = null
     private lateinit var etEventName : EditText
     private lateinit var etDate : EditText
     private lateinit var etTime : EditText
-    private lateinit var etLocation: EditText
+//    private lateinit var etLocation: EditText
     private lateinit var etDescription : EditText
     private lateinit var rgOrganizer : RadioGroup
     private lateinit var rbOrganizer : RadioButton
@@ -54,7 +61,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         etEventName = findViewById(R.id.etEventName)
         etDate = findViewById(R.id.etDate)
         etTime = findViewById(R.id.etTime)
-        etLocation = findViewById(R.id.etLocation)
+//        etLocation = findViewById(R.id.etLocation)
         etDescription = findViewById(R.id.etDescription)
         rgOrganizer = findViewById(R.id.rgOrganizer)
         url = ""
@@ -113,6 +120,40 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 // Another interface callback
             }
         }
+
+        // Initialize the AutocompleteSupportFragment (for user location)
+        autocompleteFragment =
+            supportFragmentManager.findFragmentById(R.id.afCreateEvent)
+                    as AutocompleteSupportFragment
+
+        // Style the autocomplete fragment view
+        var fView : View? = autocompleteFragment.view
+        var etTextInput : EditText = fView!!.findViewById(R.id.places_autocomplete_search_input)
+        etTextInput.setTextSize(16.0f)
+        etTextInput.setHint("Location")
+
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                // TODO: Get info about the selected place.
+                // using the place id: https://developers.google.com/maps/documentation/places/web-service/place-id
+                selectedPlaceId = place.id
+                Log.i("LocationActivity", "Place: ${place.name}, ${place.id}")
+            }
+
+            override fun onError(status: Status) {
+                // TODO: Handle the error.
+                Log.i("Location Activity", "An error occurred: $status")
+            }
+        })
+
+        //TODO: find a way to hide this api key!
+        Places.initialize(applicationContext, "AIzaSyB_A0RKs7JmFRfMvokjaUYPnDvciHNyheU")
+        val placesClient = Places.createClient(this)
 
         btnCreateEvent.setOnClickListener {
             val selectedOption: Int = rgOrganizer!!.checkedRadioButtonId
@@ -247,13 +288,13 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            TextUtils.isEmpty(etLocation.text.toString().trim()) -> {
-                Toast.makeText(
-                    this@CreateEventActivity,
-                    "Please add an event location.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+//            TextUtils.isEmpty(etLocation.text.toString().trim()) -> {
+//                Toast.makeText(
+//                    this@CreateEventActivity,
+//                    "Please add an event location.",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//            }
             TextUtils.isEmpty(etDescription.text.toString().trim()) -> {
                 Toast.makeText(
                     this@CreateEventActivity,
@@ -274,7 +315,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 val eventName: String = etEventName.text.toString().trim()
                 val eventDate: String = etDate.text.toString().trim()
                 val eventTime: String = etTime.text.toString().trim()
-                val eventLocation: String = etLocation.text.toString().trim()
+//                val eventLocation: String = etLocation.text.toString().trim()
                 val eventDescription: String = etDescription.text.toString().trim()
 
                 var currentUserUID = FirebaseAuth.getInstance().uid ?: ""
@@ -289,7 +330,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     "type" to eventType,
                     "date" to eventDate,
                     "time" to eventTime,
-                    "location" to eventLocation,
+                    "location" to selectedPlaceId,
                     "organizerType" to eventOrganizerType,
                     "organizer" to eventOrganizer,
                     "description" to eventDescription,
