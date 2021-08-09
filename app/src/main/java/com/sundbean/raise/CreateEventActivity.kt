@@ -1,17 +1,27 @@
 package com.sundbean.raise
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.TextUtils
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
+import kotlinx.android.synthetic.main.activity_create_event.*
+import java.util.*
 
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
@@ -27,6 +37,10 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private lateinit var btnCreateEvent : Button
     private lateinit var eventOrganizerType : String
     private lateinit var eventOrganizer : String
+    private var selectedPhotoUri: Uri? = null
+    private var eventPhotoUrl: String? = null
+    private val GALLERY_REQUEST_CODE = 1234
+    private val TAG = "CreateEventActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +55,16 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         etDescription = findViewById(R.id.etDescription)
         rgOrganizer = findViewById(R.id.rgOrganizer)
 
+        // get device screen dimensions and use them to set the event image to 16/9 aspect ratio
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        var screenWidth = displayMetrics.widthPixels
+        ivEventPhoto.getLayoutParams().height = (16/9) * screenWidth
+
+        // when the event photo container is clicked, the user wants to pick a photo
+        rlUploadImage.setOnClickListener {
+            pickImageFromGallery()
+        }
 
 
         val eventTypeSpinner : Spinner = findViewById(R.id.spinnerEventType)
@@ -88,21 +112,25 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
         btnCreateEvent.setOnClickListener {
             val selectedOption: Int = rgOrganizer!!.checkedRadioButtonId
-            rbOrganizer = findViewById(selectedOption)
-            Log.d("CreateEventActivity", "Selected option is: ${rbOrganizer.text}")
-            if (rbOrganizer.text == "I am") {
-                eventOrganizerType = "user"
-                eventOrganizer = FirebaseAuth.getInstance().uid ?: ""
-            } else if (rbOrganizer.text == "A group I run") {
-                eventOrganizerType = "group"
-                eventOrganizer = "SELECTED_GROUP"
+            if (selectedOption == null) {
+                Toast.makeText(this@CreateEventActivity, "Please select an event type.", Toast.LENGTH_SHORT).show()
+            } else {
+                rbOrganizer = findViewById(selectedOption)
+                Log.d("CreateEventActivity", "Selected option is: ${rbOrganizer.text}")
+                if (rbOrganizer.text == "I am") {
+                    eventOrganizerType = "user"
+                    eventOrganizer = FirebaseAuth.getInstance().uid ?: ""
+                } else if (rbOrganizer.text == "A group I run") {
+                    eventOrganizerType = "group"
+                    eventOrganizer = "SELECTED_GROUP"
+                }
+
+                Log.d("CreateEventActivity", "I've made it to the performEventCreation() function")
+                uploadImageToFirebaseStorage()
+                performEventCreation()
+                val intent = Intent(this@CreateEventActivity, EventConfirmationActivity::class.java)
+                startActivity(intent)
             }
-
-            Log.d("CreateEventActivity", "I've made it to the performEventCreation() function")
-
-            performEventCreation()
-            val intent = Intent(this@CreateEventActivity, EventConfirmationActivity::class.java)
-            startActivity(intent)
         }
 
     }
@@ -113,6 +141,83 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
         TODO("Not yet implemented")
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when(requestCode) {
+            GALLERY_REQUEST_CODE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    // retrieve data from intent
+                    data?.data?.let { uri ->
+                        ivUploadIcon.setImageResource(0)
+                        launchImageCrop(uri)
+                    }
+                } else {
+                    Log.e(TAG, "Image selection error: Couldn't select that image from memory")
+                }
+            }
+
+            CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE -> {
+                val result = CropImage.getActivityResult(data)
+                if(resultCode == Activity.RESULT_OK) {
+                    result.uri?.let {
+                        selectedPhotoUri = it
+                        setImage(it)
+                    }
+                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                    Log.e(TAG, "Crop error: ${result.error}")
+                }
+            }
+        }
+    }
+
+    private fun setImage(uri: Uri?) {
+        // use glide to set the image
+        Glide.with(this)
+            .load(uri)
+            .into(ivEventPhoto)
+    }
+
+    private fun launchImageCrop(uri: Uri) {
+        CropImage.activity(uri)
+            .setGuidelines(CropImageView.Guidelines.ON)
+            .setAspectRatio(1920, 1080)
+            .setCropShape(CropImageView.CropShape.RECTANGLE) // this can be made oval
+            .start(this)
+    }
+
+    private fun pickImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        val mimeTypes = arrayOf("image/jpeg", "image/png", "image/jpg")
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivityForResult(intent, GALLERY_REQUEST_CODE)
+    }
+
+    private fun uploadImageToFirebaseStorage() {
+        if (selectedPhotoUri == null) {
+            //TODO: make profile picture optional
+            return
+        }
+
+        val filename = UUID.randomUUID().toString()
+        val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
+
+        ref.putFile(selectedPhotoUri!!)
+            .addOnSuccessListener {
+                Log.d(TAG, "Successfully uploaded image: ${it.metadata?.path}")
+
+                ref.downloadUrl.addOnSuccessListener {
+                    Log.d(TAG, "File location: $it")
+                    eventPhotoUrl = it.toString()
+                }
+            }
+            .addOnFailureListener {
+                Log.e(TAG,"There was an error adding image to firebase storage: $it")
+            }
     }
 
     private fun performEventCreation() {
@@ -161,7 +266,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             }
 
             else -> {
-                Log.d("CreateEventActivity", "I've made it into performEventCreation() and am about to save to Firetore")
+                Log.d("CreateEventActivity", "I've made it into performEventCreation() and am about to save to Firestore")
                 val eventName: String = etEventName.text.toString().trim()
                 val eventDate: String = etDate.text.toString().trim()
                 val eventTime: String = etTime.text.toString().trim()
@@ -172,6 +277,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 val db = Firebase.firestore
                 val data = hashMapOf(
                     "name" to eventName,
+                    "photo" to eventPhotoUrl,
                     "type" to eventType,
                     "date" to eventDate,
                     "time" to eventTime,

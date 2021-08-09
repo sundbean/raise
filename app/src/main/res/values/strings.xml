@@ -4,6 +4,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="event_type_array">
+        <item>Select event type:</item>
         <item>Speaker</item>
         <item>Volunteer</item>
         <item>Workshop/Seminar</item>
