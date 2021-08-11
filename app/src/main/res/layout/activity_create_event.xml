@@ -89,20 +89,41 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/spinnerEventType" />
 
-            <EditText
-                android:id="@+id/etDate"
+            <FrameLayout
+                android:id="@+id/flEventDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_marginTop="8dp"
-                android:drawableStart="@drawable/ic_date"
-                android:drawableLeft="@drawable/ic_date"
-                android:drawablePadding="10dp"
-                android:ems="10"
-                android:hint="Date"
-                android:inputType="date"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/etEventName" />
+                app:layout_constraintTop_toBottomOf="@+id/etEventName" >
+
+                <EditText
+                    android:id="@+id/etDate"
+                    android:layout_width="216dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:drawableStart="@drawable/ic_date"
+                    android:drawableLeft="@drawable/ic_date"
+                    android:drawablePadding="10dp"
+                    android:ems="7"
+                    android:inputType="time" />
+
+                <TextView
+                    android:id="@+id/tvDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="8dp"
+                    android:drawablePadding="10dp"
+                    android:ems="10"
+                    android:paddingLeft="27dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
+                    android:text="Date"
+                    android:textColor="#969696"
+                    android:textSize="18dp" />
+
+            </FrameLayout>
 
             <EditText
                 android:id="@+id/etTime"
@@ -118,7 +139,7 @@
                 android:hint="Time"
                 android:inputType="time"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/etDate"
+                app:layout_constraintStart_toEndOf="@+id/flEventDate"
                 app:layout_constraintTop_toBottomOf="@+id/etEventName" />
 
 <!--            <EditText-->
@@ -138,13 +159,22 @@
 
             <FrameLayout
                 android:id="@+id/flLocationEditCE"
-                android:layout_width="380dp"
+                android:layout_width="370dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/autocomplete_line"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/etDate">
+                app:layout_constraintTop_toBottomOf="@+id/flEventDate">
+
+                <TextView
+                    android:id="@+id/tvAutocompleteHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingTop="20dp"
+                    android:paddingLeft="27dp"
+                    android:textSize="18dp"
+                    android:text="Location" />
 
                 <fragment
                     android:id="@+id/afCreateEvent"

@@ -1,16 +1,19 @@
 package com.sundbean.raise
 
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -28,6 +31,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.activity_create_event.*
+import java.text.SimpleDateFormat
 import java.util.*
 
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
@@ -37,6 +41,8 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private var selectedPlaceId: String? = null
     private var eventType : String? = null
     private lateinit var etEventName : EditText
+    private lateinit var tvDate : TextView
+    private lateinit var flDate : FrameLayout
     private lateinit var etDate : EditText
     private lateinit var etTime : EditText
 //    private lateinit var etLocation: EditText
@@ -45,12 +51,14 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private lateinit var rbOrganizer : RadioButton
     private lateinit var btnCreateEvent : Button
     private lateinit var eventOrganizerType : String
+    private lateinit var tvAutocompleteHint : TextView
     private lateinit var eventOrganizer : String
     private var selectedPhotoUri: Uri? = null
     private lateinit var url: String
 //    private lateinit var eventReference: Void
     private val GALLERY_REQUEST_CODE = 1234
     private val TAG = "CreateEventActivity"
+    private var cal = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,11 +67,14 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         rgOrganizer = findViewById(R.id.rgOrganizer)
         btnCreateEvent = findViewById(R.id.btnCreateEvent)
         etEventName = findViewById(R.id.etEventName)
+        tvDate = findViewById(R.id.tvDate)
+        flDate = findViewById(R.id.flEventDate)
         etDate = findViewById(R.id.etDate)
         etTime = findViewById(R.id.etTime)
 //        etLocation = findViewById(R.id.etLocation)
         etDescription = findViewById(R.id.etDescription)
         rgOrganizer = findViewById(R.id.rgOrganizer)
+        tvAutocompleteHint = findViewById(R.id.tvAutocompleteHint)
         url = ""
 
         // get device screen dimensions and use them to set the event image to 16/9 aspect ratio
@@ -77,7 +88,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             pickImageFromGallery()
         }
 
-
+        // Handling event type input
         val eventTypeSpinner : Spinner = findViewById(R.id.spinnerEventType)
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
@@ -90,6 +101,29 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             // Apply the adapter to the spinner
             eventTypeSpinner.adapter = adapter
         }
+
+        // TODO: Change the default color of the datepicker calendar
+        //Handling date input - create an OnDateSetListener
+        val dateSetListener = object : DatePickerDialog.OnDateSetListener {
+            override fun onDateSet(view: DatePicker, year: Int, monthOfYear: Int, dayOfMonth: Int) {
+                cal.set(Calendar.YEAR, year)
+                cal.set(Calendar.MONTH, monthOfYear)
+                cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                updateDateInView()
+            }
+        }
+
+        //Handling date input - when you click on etDate EditText, show DatePickerDialog that is set with OnDateListener
+        tvDate.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(view: View) {
+                DatePickerDialog(this@CreateEventActivity,
+                dateSetListener,
+                // set DatePickerDialog to point to today's date when it loads up
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)).show()
+            }
+        })
 
 
         // Make the causes recycler view
@@ -130,8 +164,10 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         var fView : View? = autocompleteFragment.view
         var etTextInput : EditText = fView!!.findViewById(R.id.places_autocomplete_search_input)
         etTextInput.setTextSize(16.0f)
-        etTextInput.setHint("Location")
 
+        // TODO: find a way to make the autocomplete icon aligned with the rest of the layout, and change the icon
+        // make the autocomplete icon line up with the other icons
+        autocompleteFragment.view?.setPadding(-40, 0, 0, 0)
 
         // Specify the types of place data to return.
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
@@ -142,6 +178,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 // TODO: Get info about the selected place.
                 // using the place id: https://developers.google.com/maps/documentation/places/web-service/place-id
                 selectedPlaceId = place.id
+                tvAutocompleteHint.setVisibility(View.GONE)
                 Log.i("LocationActivity", "Place: ${place.name}, ${place.id}")
             }
 
@@ -214,6 +251,14 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         }
     }
 
+    private fun updateDateInView() {
+        val format = "MM/dd/yyyy"
+        val sdf = SimpleDateFormat(format, Locale.US)
+        // need to change this to black because its gray when Activity first loads
+        tvDate!!.setTextColor(resources.getColor(R.color.black))
+        tvDate!!.text = sdf.format(cal.getTime())
+    }
+
     private fun setImage(uri: Uri?) {
         // take down the upload icon
         ivUploadIcon.setImageResource(0)
@@ -274,7 +319,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            TextUtils.isEmpty(etDate.text.toString().trim()) -> {
+            TextUtils.isEmpty(tvDate.text.toString().trim()) -> {
                 Toast.makeText(
                     this@CreateEventActivity,
                     "Please add an event date.",
@@ -313,7 +358,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             else -> {
                 Log.d("CreateEventActivity", "I've made it into performEventCreation() and am about to save to Firestore")
                 val eventName: String = etEventName.text.toString().trim()
-                val eventDate: String = etDate.text.toString().trim()
+                val eventDate: String = tvDate.text.toString().trim()
                 val eventTime: String = etTime.text.toString().trim()
 //                val eventLocation: String = etLocation.text.toString().trim()
                 val eventDescription: String = etDescription.text.toString().trim()
