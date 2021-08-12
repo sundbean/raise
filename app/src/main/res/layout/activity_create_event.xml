@@ -40,6 +40,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="5dip"
                 android:layout_marginBottom="5dip"
+                android:adjustViewBounds="true"
                 app:srcCompat="@drawable/background_blue_rectangle" />
 
             <ImageView
@@ -94,7 +95,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/etEventName" >
+                app:layout_constraintTop_toBottomOf="@+id/etEventName">
 
                 <EditText
                     android:id="@+id/etDate"
@@ -125,37 +126,44 @@
 
             </FrameLayout>
 
-            <EditText
-                android:id="@+id/etTime"
+            <FrameLayout
+                android:id="@+id/flEventTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="7dp"
-                android:drawableStart="@drawable/ic_time"
-                android:drawableLeft="@drawable/ic_time"
-                android:drawablePadding="10dp"
-                android:ems="7"
-                android:hint="Time"
-                android:inputType="time"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/flEventDate"
-                app:layout_constraintTop_toBottomOf="@+id/etEventName" />
+                app:layout_constraintTop_toBottomOf="@+id/etEventName">
 
-<!--            <EditText-->
-<!--                android:id="@+id/etLocation"-->
-<!--                android:layout_width="380dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="8dp"-->
-<!--                android:drawableStart="@drawable/ic_location"-->
-<!--                android:drawableLeft="@drawable/ic_location"-->
-<!--                android:drawablePadding="10dp"-->
-<!--                android:ems="10"-->
-<!--                android:hint="Location"-->
-<!--                android:inputType="textPostalAddress"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@+id/etDate" />-->
+                <EditText
+                    android:id="@+id/etTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="7dp"
+                    android:drawableStart="@drawable/ic_time"
+                    android:drawableLeft="@drawable/ic_time"
+                    android:drawablePadding="10dp"
+                    android:ems="7" />
+
+                <TextView
+                    android:id="@+id/tvTime"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="8dp"
+                    android:drawablePadding="10dp"
+                    android:ems="10"
+                    android:paddingLeft="27dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
+                    android:text="Time"
+                    android:textColor="#969696"
+                    android:textSize="18dp" />
+
+            </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/flLocationEditCE"
@@ -181,6 +189,7 @@
                     android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:hint=""
                     android:layout_marginTop="0dp" />
             </FrameLayout>
 

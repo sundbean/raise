@@ -2,7 +2,10 @@ package com.sundbean.raise
 
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
+import android.content.res.Resources
+import android.graphics.Color
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,6 +15,7 @@ import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
@@ -31,8 +35,11 @@ import com.google.firebase.storage.FirebaseStorage
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.activity_create_event.*
+import kotlinx.android.synthetic.main.activity_create_event.ivEventPhoto
+import kotlinx.android.synthetic.main.activity_event_details.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.roundToInt
 
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
@@ -44,7 +51,10 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private lateinit var tvDate : TextView
     private lateinit var flDate : FrameLayout
     private lateinit var etDate : EditText
+    private lateinit var flTime : FrameLayout
+    private lateinit var tvTime : TextView
     private lateinit var etTime : EditText
+
 //    private lateinit var etLocation: EditText
     private lateinit var etDescription : EditText
     private lateinit var rgOrganizer : RadioGroup
@@ -71,17 +81,12 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         flDate = findViewById(R.id.flEventDate)
         etDate = findViewById(R.id.etDate)
         etTime = findViewById(R.id.etTime)
-//        etLocation = findViewById(R.id.etLocation)
+        flTime = findViewById(R.id.flEventTime)
+        tvTime = findViewById(R.id.tvTime)
         etDescription = findViewById(R.id.etDescription)
         rgOrganizer = findViewById(R.id.rgOrganizer)
         tvAutocompleteHint = findViewById(R.id.tvAutocompleteHint)
         url = ""
-
-        // get device screen dimensions and use them to set the event image to 16/9 aspect ratio
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        var screenWidth = displayMetrics.widthPixels
-        ivEventPhoto.getLayoutParams().height = (16/9) * screenWidth
 
         // when the event photo container is clicked, the user wants to pick a photo
         rlUploadImage.setOnClickListener {
@@ -125,6 +130,22 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             }
         })
 
+        // Handling time input
+        val mTimePicker: TimePickerDialog
+        val mcurrentTime = Calendar.getInstance()
+        val hour = mcurrentTime.get(Calendar.HOUR_OF_DAY)
+        val minute = mcurrentTime.get(Calendar.MINUTE)
+
+        mTimePicker = TimePickerDialog(this, object : TimePickerDialog.OnTimeSetListener {
+            override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+                tvTime.setText(String.format("%d : %d", hourOfDay, minute))
+                tvTime.setTextColor(Color.parseColor("#000000"))
+            }
+        }, hour, minute, false)
+
+        tvTime.setOnClickListener { v ->
+            mTimePicker.show()
+        }
 
         // Make the causes recycler view
         causesRecyclerView = findViewById(R.id.rvChooseEventCauses)
@@ -265,6 +286,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         // use glide to set the image
         Glide.with(this)
             .load(uri)
+            .override(Resources.getSystem().getDisplayMetrics().widthPixels)
             .into(ivEventPhoto)
     }
 
@@ -326,20 +348,13 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            TextUtils.isEmpty(etTime.text.toString().trim()) -> {
+            TextUtils.isEmpty(tvTime.text.toString().trim()) -> {
                 Toast.makeText(
                     this@CreateEventActivity,
                     "Please add an event time.",
                     Toast.LENGTH_SHORT
                 ).show()
             }
-//            TextUtils.isEmpty(etLocation.text.toString().trim()) -> {
-//                Toast.makeText(
-//                    this@CreateEventActivity,
-//                    "Please add an event location.",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//            }
             TextUtils.isEmpty(etDescription.text.toString().trim()) -> {
                 Toast.makeText(
                     this@CreateEventActivity,
@@ -359,8 +374,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 Log.d("CreateEventActivity", "I've made it into performEventCreation() and am about to save to Firestore")
                 val eventName: String = etEventName.text.toString().trim()
                 val eventDate: String = tvDate.text.toString().trim()
-                val eventTime: String = etTime.text.toString().trim()
-//                val eventLocation: String = etLocation.text.toString().trim()
+                val eventTime: String = tvTime.text.toString().trim()
                 val eventDescription: String = etDescription.text.toString().trim()
 
                 var currentUserUID = FirebaseAuth.getInstance().uid ?: ""
