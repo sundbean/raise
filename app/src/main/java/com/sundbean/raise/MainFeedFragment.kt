@@ -3,14 +3,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.type.Date
 import com.google.type.DateTime
 import com.sundbean.raise.*
 import com.sundbean.raise.R
+import kotlinx.android.synthetic.main.activity_event_confirmation.*
 import kotlinx.android.synthetic.main.fragment_main_feed2.*
 import kotlinx.android.synthetic.main.fragment_organize.*
 import java.util.*
@@ -18,6 +23,7 @@ import java.util.EventListener
 
 class MainFeedFragment:Fragment(R.layout.fragment_main_feed2) {
 
+    private lateinit var tvMainFeedHeadline : TextView
     private lateinit var recyclerView : RecyclerView
     private lateinit var opportunityArrayList: ArrayList<Opportunity>
     private lateinit var feedItemAdapter: MainFeedItemAdapter
@@ -27,9 +33,12 @@ class MainFeedFragment:Fragment(R.layout.fragment_main_feed2) {
 
         super.onViewCreated(view, savedInstanceState)
 
+        tvMainFeedHeadline = view.findViewById(R.id.tvMainFeedHeadline)
         recyclerView = view.findViewById(R.id.rvMainFeed)
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.setHasFixedSize(true)
+
+        setLocation()
 
         opportunityArrayList = arrayListOf()
 
@@ -38,12 +47,6 @@ class MainFeedFragment:Fragment(R.layout.fragment_main_feed2) {
         recyclerView.adapter = feedItemAdapter
 
         eventChangeListener()
-
-
-//        var date = "2021-10-12, 14:50"
-//        var dateTime = java.util.Date(2021, 12, 12, 16, 40)
-//        Log.d("MainFeedFragment", "dateTime: $dateTime")
-//        tvDateDisplayTest.text = dateTime.toString()
 
         // An approach for dealing with dates:
         // Grab the year, month, day, hour, and minute from the date picker and time picker and store each in its own variable
@@ -54,22 +57,19 @@ class MainFeedFragment:Fragment(R.layout.fragment_main_feed2) {
         // // // - in this format it will be easier to figure out dates in a certain provided time range
         // // // - then when i need to display hte dates, I can parse out the data from the string (possibly splitting at "-" and putting the values in an array) to display in my desired format
 
-
-//        llCreateEventBtn.setOnClickListener {
-//            val intent = Intent(activity, CreateEventActivity::class.java)
-//            requireActivity().startActivity(intent)
-//        }
-//
-//        llCreateFundraiserBtn.setOnClickListener {
-//            val intent = Intent(activity, CreateFundraiserActivity::class.java)
-//            requireActivity().startActivity(intent)
-//        }
-//
-//        llCreateGroupBtn.setOnClickListener {
-//            val intent = Intent(activity, CreateGroupActivity::class.java)
-//            requireActivity().startActivity(intent)
-//        }
 }
+
+    private fun setLocation() {
+        var currentUserUID = FirebaseAuth.getInstance().uid ?: ""
+        val uid = currentUserUID as String
+        val db = Firebase.firestore
+        var userRef = db.collection("users").document(uid)
+        var placeId : String? = null
+        userRef.get().addOnSuccessListener { userDoc ->
+             placeId = userDoc.getString("location")
+        }
+        tvMainFeedHeadline.text
+    }
 
     private fun eventChangeListener() {
         db = FirebaseFirestore.getInstance()

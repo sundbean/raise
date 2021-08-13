@@ -10,12 +10,12 @@
         android:id="@+id/explore"
         android:title="Explore"
         android:enabled="true"
-        android:icon="@drawable/ic_explore_foreground"/>
+        android:icon="@drawable/ic_search_foreground"/>
     <item
         android:id="@+id/organize"
         android:title="Organize"
         android:enabled="true"
-        android:icon="@drawable/ic_organize_foreground"/>
+        android:icon="@drawable/ic_explore_foreground"/>
     <item
         android:id="@+id/notifications"
         android:title="Notifications"
