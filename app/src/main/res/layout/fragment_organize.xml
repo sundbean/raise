@@ -13,11 +13,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:fontFamily="sans-serif-condensed-light"
+        android:fontFamily="@font/bebas_neue_bold"
         android:text="organize"
         android:textAllCaps="true"
         android:textColor="#404E68"
-        android:textSize="20sp"
+        android:textSize="27dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -82,12 +82,12 @@
                     android:id="@+id/tvCEventTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/arimo"
+                    android:fontFamily="@font/arial_ce_bold"
                     android:text="create an event"
                     android:textAlignment="viewStart"
                     android:textAllCaps="true"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
+                    android:textSize="19dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -102,9 +102,10 @@
                     android:id="@+id/tvCEventDes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/arial_bold"
                     android:text="Bring people together for a one-time discussion group, meeting, volunteer opportunity--you name it!"
                     android:textColor="@color/white"
-                    android:textSize="12sp" />
+                    android:textSize="11dp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -185,12 +186,12 @@
                     android:id="@+id/tvCFundraiserTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/arimo"
+                    android:fontFamily="@font/arial_ce_bold"
                     android:text="create a fundraiser"
                     android:textAlignment="viewStart"
                     android:textAllCaps="true"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
+                    android:textSize="19dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -205,9 +206,10 @@
                     android:id="@+id/tvCFundraiserDes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/arial_bold"
                     android:text="Reach out to would-be donors and raise money for the charity or person of your choice!"
                     android:textColor="@color/white"
-                    android:textSize="12sp" />
+                    android:textSize="11dp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -288,12 +290,12 @@
                     android:id="@+id/tvCGroupTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/arimo"
+                    android:fontFamily="@font/arial_ce_bold"
                     android:text="create a group"
                     android:textAlignment="viewStart"
                     android:textAllCaps="true"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
+                    android:textSize="19dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -308,9 +310,10 @@
                     android:id="@+id/tvCGroupDes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/arial_bold"
                     android:text="Form a community of like-minded people and organize events and fundraisers from your new platform."
                     android:textColor="@color/white"
-                    android:textSize="12sp" />
+                    android:textSize="11dp" />
             </LinearLayout>
 
         </LinearLayout>

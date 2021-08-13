@@ -6,23 +6,22 @@ import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
+import android.location.Geocoder
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.Editable
 import android.text.TextUtils
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AddressComponents
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
@@ -39,13 +38,13 @@ import kotlinx.android.synthetic.main.activity_create_event.ivEventPhoto
 import kotlinx.android.synthetic.main.activity_event_details.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.roundToInt
 
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private lateinit var causesRecyclerView : RecyclerView
     private lateinit var autocompleteFragment : AutocompleteSupportFragment
     private var selectedPlaceId: String? = null
+    private lateinit var selectedPlaceCoordinates: LatLng
     private var eventType : String? = null
     private lateinit var etEventName : EditText
     private lateinit var tvDate : TextView
@@ -54,8 +53,6 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private lateinit var flTime : FrameLayout
     private lateinit var tvTime : TextView
     private lateinit var etTime : EditText
-
-//    private lateinit var etLocation: EditText
     private lateinit var etDescription : EditText
     private lateinit var rgOrganizer : RadioGroup
     private lateinit var rbOrganizer : RadioButton
@@ -65,17 +62,17 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private lateinit var eventOrganizer : String
     private var selectedPhotoUri: Uri? = null
     private lateinit var url: String
-//    private lateinit var eventReference: Void
     private val GALLERY_REQUEST_CODE = 1234
     private val TAG = "CreateEventActivity"
     private var cal = Calendar.getInstance()
+    private val dateFormat = SimpleDateFormat("dd / MM / yyyy")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_event)
 
         rgOrganizer = findViewById(R.id.rgOrganizer)
-        btnCreateEvent = findViewById(R.id.btnCreateEvent)
+        btnCreateEvent = findViewById(R.id.btnRSVP)
         etEventName = findViewById(R.id.etEventName)
         tvDate = findViewById(R.id.tvDate)
         flDate = findViewById(R.id.flEventDate)
@@ -191,7 +188,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         autocompleteFragment.view?.setPadding(-40, 0, 0, 0)
 
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.ADDRESS_COMPONENTS))
 
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
@@ -199,8 +196,8 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 // TODO: Get info about the selected place.
                 // using the place id: https://developers.google.com/maps/documentation/places/web-service/place-id
                 selectedPlaceId = place.id
+                selectedPlaceCoordinates = place.latLng!!
                 tvAutocompleteHint.setVisibility(View.GONE)
-                Log.i("LocationActivity", "Place: ${place.name}, ${place.id}")
             }
 
             override fun onError(status: Status) {
@@ -382,19 +379,23 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 val db = Firebase.firestore
                 var userRef = db.collection("users").document(uid)
 
+                var locationData = getLocationDataFromCoordinates(selectedPlaceCoordinates)
+
                 // save event to Firestore events collection
                 val data = hashMapOf(
                     "name" to eventName,
                     "photoUrl" to "",
+                    "oppType" to "event",
                     "type" to eventType,
                     "date" to eventDate,
                     "time" to eventTime,
-                    "location" to selectedPlaceId,
+                    "location" to locationData,
                     "organizerType" to eventOrganizerType,
                     "organizer" to eventOrganizer,
                     "description" to eventDescription,
                     "createdBy" to FirebaseAuth.getInstance().uid,
-                    "attendees" to listOf(userRef.id)
+                    "attendees" to listOf(userRef.id),
+                    "rsvpNum" to 1
                 )
                 Log.i(TAG, "User reference is: $userRef and uid is ${FirebaseAuth.getInstance().uid}")
                 db.collection("events").add(data)
@@ -417,4 +418,16 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         }
     }
 
+    private fun getLocationDataFromCoordinates(coordinates: LatLng): Any? {
+        var geocoder = Geocoder(this@CreateEventActivity, Locale.US)
+        val addresses = geocoder.getFromLocation(coordinates.latitude, coordinates.longitude, 1)
+        return hashMapOf (
+            "address" to addresses[0].getAddressLine(0),
+            "coordinates" to coordinates,
+            "placeId" to selectedPlaceId,
+            "locality" to addresses[0].locality,
+            "admin" to addresses[0].adminArea,
+            "subAdmin" to addresses[0].subAdminArea,
+            "postalCode" to addresses[0].postalCode)
+    }
 }

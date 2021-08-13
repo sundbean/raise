@@ -11,24 +11,25 @@
         android:minHeight="1600dp">
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/ibBackButton"
             android:layout_width="39dp"
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
+            android:background="@color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_back_button_salmon_foreground" />
 
         <ImageView
             android:id="@+id/ivEventDetailsImage"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:adjustViewBounds="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageButton"
+            app:layout_constraintTop_toBottomOf="@+id/ibBackButton"
             app:srcCompat="@drawable/ic_event_black_large_foreground" />
 
         <TextView
@@ -36,7 +37,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="TextView"
+            android:fontFamily="@font/bebas_neue_bold"
+            android:text="Event Title"
+            android:textColor="@color/primary_navy"
+            android:textSize="27dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ivEventDetailsImage" />
@@ -46,7 +50,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="TextView"
+            android:fontFamily="@font/arial_ce_bold"
+            android:text="# Attending"
+            android:textColor="@color/primary_blue"
+            android:textSize="15dp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvEventDetailTitle" />
@@ -60,23 +68,32 @@
             app:layout_constraintTop_toBottomOf="@+id/tvNumberOfAttendees">
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/tvEventDetailTime"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginRight="0.5dp"
                 android:layout_weight="1"
                 android:background="@color/primary_blue"
                 android:backgroundTint="@color/primary_blue"
-                android:text="TextView" />
+                android:fontFamily="@font/arial_bold"
+                android:gravity="center"
+                android:text="TextView"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="14dp" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/tvEventDetailDate"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="0.5dp"
                 android:layout_weight="1"
                 android:background="@color/primary_blue"
-                android:text="TextView" />
+                android:fontFamily="@font/arial_bold"
+                android:gravity="center"
+                android:text="TextView"
+                android:textAlignment="center"
+                android:textColor="@color/white" />
         </LinearLayout>
 
         <TextView
@@ -84,8 +101,11 @@
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:fontFamily="@font/arial_bold"
             android:text="Description"
             android:textAllCaps="true"
+            android:textColor="@color/primary_navy"
+            android:textSize="19dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/llEventDetailEventAndTimeHolder" />
@@ -95,7 +115,9 @@
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:fontFamily="@font/arial_ce"
             android:text='"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."'
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvEventDetailDescriptionTitle" />
@@ -110,20 +132,30 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvEventDetailDescription" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCreateEvent"
-            android:layout_width="340dp"
-            android:layout_height="60dp"
-            android:layout_margin="24dp"
-            android:layout_marginTop="8dp"
-            android:text="RSVP"
-            app:backgroundTint="@color/primary_salmon"
-            app:cornerRadius="50dp"
-            app:iconTint="@color/primary_salmon"
+        <FrameLayout
+            android:id="@+id/flRSVP"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/dividerEventDetail"
-            app:strokeColor="@color/primary_salmon" />
+            app:layout_constraintTop_toBottomOf="@+id/dividerEventDetail">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRSVP"
+                android:layout_width="340dp"
+                android:layout_height="60dp"
+                android:layout_margin="24dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/arial_ce_bold"
+                android:text="RSVP"
+                android:textSize="13.5dp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/primary_salmon"
+                app:cornerRadius="50dp"
+                app:iconTint="@color/primary_salmon"
+                app:strokeColor="@color/primary_salmon" />
+
+        </FrameLayout>
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapView"
@@ -132,15 +164,18 @@
             android:layout_marginTop="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnCreateEvent" />
+            app:layout_constraintTop_toBottomOf="@+id/flRSVP" />
 
         <TextView
             android:id="@+id/textView8"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:fontFamily="@font/arial_bold"
             android:text="About the Organizer"
             android:textAllCaps="true"
+            android:textColor="@color/primary_navy"
+            android:textSize="19dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mapView" />
@@ -157,7 +192,7 @@
 
             <ImageView
                 android:id="@+id/ivEventDetailOrganizerImage"
-                android:layout_width="wrap_content"
+                android:layout_width="112dp"
                 android:layout_height="wrap_content"
                 app:srcCompat="@drawable/ic_explore_foreground" />
 
@@ -171,14 +206,24 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="TextView" />
+                    android:fontFamily="@font/arial_bold"
+                    android:gravity="bottom"
+                    android:paddingLeft="15dp"
+                    android:text="TextView"
+                    android:textColor="@color/primary_navy"
+                    android:textSize="19dp" />
 
                 <TextView
                     android:id="@+id/tvEventDetailEventOrganizerCity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="TextView" />
+                    android:fontFamily="@font/arial_bold"
+                    android:paddingLeft="15dp"
+                    android:paddingTop="5dp"
+                    android:text="TextView"
+                    android:textColor="@color/primary_blue"
+                    android:textSize="15dp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -188,7 +233,9 @@
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:fontFamily="@font/arial_ce"
             android:text='"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."'
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/llEventDetailEventOrganizerLabel" />

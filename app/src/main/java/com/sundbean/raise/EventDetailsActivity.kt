@@ -31,10 +31,14 @@ class EventDetailsActivity : AppCompatActivity() {
         eventRef.get()
             .addOnSuccessListener { document ->
                 Log.d(TAG, "Event data: ${document.data}")
-                val storage = FirebaseStorage.getInstance()
                 val imgUrl = document.getString("photoUrl")
-                Log.d(TAG, "Image url is $imgUrl")
                 Glide.with(this).load(imgUrl).override(Resources.getSystem().getDisplayMetrics().widthPixels).into(displayImageView)
+                tvEventDetailTitle.text = document.getString("name")
+                val attendees = document.get("attendees") as ArrayList<String>
+                var numAttendees = attendees.size as String
+                tvNumberOfAttendees.text = numAttendees + " going"
+                tvEventDetailTime.text = document.getString("time")
+
             }
             .addOnFailureListener { e ->
                 Log.d(TAG, "Error getting document reference: $e")
@@ -42,7 +46,12 @@ class EventDetailsActivity : AppCompatActivity() {
 
     }
 
-    //TODO: Programmatically make image height according to desired aspect ratio
+
+
     //TODO: Fix scroll issue like other scroll view layouts
 
 }
+
+data class Attendees(
+    var attendeesList: ArrayList<String>
+)
