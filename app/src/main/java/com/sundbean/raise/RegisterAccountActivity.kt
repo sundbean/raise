@@ -2,6 +2,7 @@ package com.sundbean.raise
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -10,11 +11,10 @@ import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.cardview.widget.CardView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
@@ -24,6 +24,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
+import kotlinx.android.synthetic.main.activity_create_event.*
 import kotlinx.android.synthetic.main.activity_register_account.*
 import java.util.*
 
@@ -35,6 +38,9 @@ class RegisterAccountActivity : AppCompatActivity() {
     private lateinit var etPassword: EditText
     private lateinit var etConfirmPassword: EditText
     private lateinit var btnUploadPhoto: CardView
+    private val GALLERY_REQUEST_CODE = 1234
+    private var selectedPhotoUri: Uri? = null
+    private val TAG = "RegisterAccountActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,30 +58,65 @@ class RegisterAccountActivity : AppCompatActivity() {
         }
 
         btnUploadPhoto.setOnClickListener {
-            Log.d("RegisterAccountActivity", "Try to show photo selector")
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            startActivityForResult(intent, 0)
+            pickImageFromGallery()
         }
     }
 
-    var selectedPhotoUri: Uri? = null
+    private fun pickImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        val mimeTypes = arrayOf("image/jpeg", "image/png", "image/jpg")
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivityForResult(intent, GALLERY_REQUEST_CODE)
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == 0 && resultCode == Activity.RESULT_OK && data!= null) {
-            // proceed and check what the selected image was ...
-            Log.d("RegisterAccountActivity", "Photo was selected")
+        when(requestCode) {
+            GALLERY_REQUEST_CODE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    // retrieve data from intent
+                    data?.data?.let { uri ->
+                        launchImageCrop(uri)
+                    }
+                } else {
+                    Log.e(TAG, "Image selection error: Couldn't select that image from memory")
+                }
+            }
 
-            selectedPhotoUri = data.data
-
-            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPhotoUri)
-
-            val bitmapDrawable = BitmapDrawable(bitmap)
-            llUploadPhotoIconOverlay.setVisibility(View.GONE)
-            ivProfileImage.setBackgroundDrawable(bitmapDrawable)
+            CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE -> {
+                val result = CropImage.getActivityResult(data)
+                if(resultCode == Activity.RESULT_OK) {
+                    result.uri?.let {
+                        selectedPhotoUri = it
+                        setImage(it)
+                    }
+                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                    Log.e(TAG, "Crop error: ${result.error}")
+                }
+            }
         }
+    }
+
+    private fun setImage(uri: Uri) {
+        // take down the upload icon
+        ivRegisterUploadIcon.setImageResource(0)
+
+        // use glide to set the image
+        Glide.with(this)
+            .load(uri)
+            .into(ivProfileImage)
+    }
+
+    private fun launchImageCrop(uri: Uri) {
+        CropImage.activity(uri)
+            .setGuidelines(CropImageView.Guidelines.ON)
+            .setAspectRatio(1920, 1920)
+            .setCropShape(CropImageView.CropShape.OVAL) // this can be made oval
+            .start(this)
     }
 
     private fun performRegister() {

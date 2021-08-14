@@ -1,15 +1,18 @@
 package com.sundbean.raise
 
 import android.content.Context
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.feed_card_layout.view.*
+import java.time.LocalTime
 
 class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var context : Context) :
     RecyclerView.Adapter<MainFeedItemAdapter.MyViewHolder>() {
@@ -22,20 +25,36 @@ class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var con
         return MyViewHolder(itemView)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: MainFeedItemAdapter.MyViewHolder, position: Int) {
         val opportunity : Opportunity = modelList[position]
 
-        holder.details.text = "${opportunity.date} \u2022 ${opportunity.time}"
+        var time = opportunity.startTime
+        var hour = time!!.get("hour")!!
+        var minute = time!!.get("minute")!!
+        var meridian = "AM"
+        if (hour >= 12) {
+            meridian = "PM"
+            if (hour != 12) {
+                hour -= 12
+            }
+        }
 
-        if (opportunity.type == "event") {
-            holder.oppIcon.setBackgroundResource(R.drawable.ic_date)
+        var displayTime = LocalTime.of(hour, minute)
+
+        holder.details.text = "${opportunity.date}  \u2022  $displayTime$meridian  \u2022  ${opportunity.rsvpNum} Going"
+
+        if (opportunity.oppType == "event") {
+            holder.oppIcon.setImageResource(R.drawable.ic_date)
             holder.name.text = "Event \u2022 ${opportunity.name}"
-        } else if (opportunity.type == "fundraiser") {
-            holder.oppIcon.setBackgroundResource(R.drawable.ic_dollars)
+        } else if (opportunity.oppType == "fundraiser") {
+            holder.oppIcon.setImageResource(R.drawable.ic_dollars)
             holder.name.text = "Fundraiser \u2022 ${opportunity.name}"
         }
 
-        Glide.with(context!!).load(opportunity.photoUrl).into(holder.oppPhoto)
+        Glide.with(context!!).load(opportunity.photoUrl).centerCrop().into(holder.oppPhoto)
+
+
     }
 
     override fun getItemCount(): Int {

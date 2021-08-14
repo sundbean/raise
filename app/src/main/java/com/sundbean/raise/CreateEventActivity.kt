@@ -33,6 +33,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.sundbean.raise.BuildConfig.MAPS_API_KEY
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.activity_create_event.*
@@ -191,7 +192,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         })
 
         //TODO: find a way to hide this api key!
-        Places.initialize(applicationContext, "AIzaSyB_A0RKs7JmFRfMvokjaUYPnDvciHNyheU")
+        Places.initialize(applicationContext, MAPS_API_KEY)
         val placesClient = Places.createClient(this)
 
         btnCreateEvent.setOnClickListener {
@@ -245,22 +246,20 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         val day = cal.get(Calendar.DAY_OF_MONTH)
 
         val dpd = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-            updateDateInView()
+            //TODO: BUG! For some reason, selectedDate ends up being today's date, or at least that's how its saving in the database
+            val displayFormat = "MM/dd/yyyy"
+            val displaySdf = SimpleDateFormat(displayFormat, Locale.US)
+            val storageFormat = "yyyy-MM-dd"
+            val storageSdf = SimpleDateFormat(storageFormat, Locale.US)
+            // need to change this to black because its gray when Activity first loads
+            tvDate!!.setTextColor(resources.getColor(R.color.black))
+            tvDate!!.text = displaySdf.format(cal.getTime())
+            selectedDate = storageSdf.format(cal.getTime())
         }, year, month, day)
 
         dpd.show()
     }
 
-    private fun updateDateInView() {
-        val displayFormat = "MM/dd/yyyy"
-        val displaySdf = SimpleDateFormat(displayFormat, Locale.US)
-        val storageFormat = "yyyy-MM-dd"
-        val storageSdf = SimpleDateFormat(storageFormat, Locale.US)
-        // need to change this to black because its gray when Activity first loads
-        tvDate!!.setTextColor(resources.getColor(R.color.black))
-        tvDate!!.text = displaySdf.format(cal.getTime())
-        selectedDate = storageSdf.format(cal.getTime())
-    }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         TODO("Not yet implemented")

@@ -19,6 +19,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.sundbean.raise.BuildConfig.MAPS_API_KEY
 import java.util.*
 
 class RegistrationSetLocationActivity : AppCompatActivity() {
@@ -66,13 +67,11 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
         })
 
         //TODO: find a way to hide this api key!
-        Places.initialize(applicationContext, "AIzaSyB_A0RKs7JmFRfMvokjaUYPnDvciHNyheU")
+        Places.initialize(applicationContext, MAPS_API_KEY)
         val placesClient = Places.createClient(this)
 
         setLocationBtn.setOnClickListener {
             storeLocationInFirebase(coordinates)
-            auth.signOut()
-            // since user is signed out, they need to be directed back to LoginActivity
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }

@@ -11,9 +11,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:fontFamily="@font/bebas_neue_bold"
         android:text="Create Your Account"
         android:textAllCaps="true"
-        android:textSize="20sp"
+        android:textSize="27dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,8 +25,10 @@
         android:layout_width="170dp"
         android:layout_height="170dp"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_marginTop="24dp"
         android:elevation="12dp"
+        android:padding="0dp"
         app:cardCornerRadius="140dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,8 +38,9 @@
             android:id="@+id/ivProfileImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:adjustViewBounds="true"
             android:scaleType="centerCrop"
-            android:background="@drawable/background_blue_rectangle" />
+            android:src="@drawable/background_blue_rectangle" />
 
         <LinearLayout
             android:id="@+id/llUploadPhotoIconOverlay"
@@ -53,19 +57,11 @@
 
                 <ImageView
                     android:id="@+id/ivRegisterUploadIcon"
-                    android:layout_width="100dp"
-                    android:layout_height="90dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     app:srcCompat="@drawable/img_upload_white_no_padding_foreground" />
 
-                <TextView
-                    android:id="@+id/tvUploadPhoto"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="Upload Photo \n (Optional)"
-                    android:textAlignment="center"
-                    android:textColor="@color/white" />
             </LinearLayout>
         </LinearLayout>
 
@@ -78,6 +74,7 @@
         android:layout_marginTop="24dp"
         android:background="@drawable/edit_text_border"
         android:ems="10"
+        android:fontFamily="@font/arial_ce"
         android:hint="Full Name"
         android:inputType="textPersonName"
         android:paddingLeft="10dp"
@@ -92,6 +89,7 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/edit_text_border"
         android:ems="10"
+        android:fontFamily="@font/arial_ce"
         android:hint="Email"
         android:inputType="textEmailAddress"
         android:paddingLeft="10dp"
@@ -106,6 +104,7 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/edit_text_border"
         android:ems="10"
+        android:fontFamily="@font/arial_ce"
         android:hint="Password"
         android:inputType="textPassword"
         android:paddingLeft="10dp"
@@ -120,6 +119,7 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/edit_text_border"
         android:ems="10"
+        android:fontFamily="@font/arial_ce"
         android:hint="Confirm Password"
         android:inputType="textPassword"
         android:paddingLeft="10dp"
@@ -132,6 +132,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:fontFamily="@font/arial_ce"
         android:text="By creating an account you agree to our \n Terms of Service and Privacy Policy"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
@@ -145,7 +146,9 @@
         android:layout_margin="24dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="40dp"
+        android:fontFamily="@font/arial_bold"
         android:text="Create Account"
+        android:textSize="13.5dp"
         app:backgroundTint="@color/primary_salmon"
         app:cornerRadius="50dp"
         app:iconTint="@color/primary_salmon"

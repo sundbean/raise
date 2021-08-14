@@ -64,11 +64,12 @@ class MainFeedFragment:Fragment(R.layout.fragment_main_feed2) {
         val uid = currentUserUID as String
         val db = Firebase.firestore
         var userRef = db.collection("users").document(uid)
-        var placeId : String? = null
         userRef.get().addOnSuccessListener { userDoc ->
-             placeId = userDoc.getString("location")
+            var location = userDoc.get("location") as Map<String, *>
+            var city = location.get("locality") as String
+
+            tvMainFeedHeadline.text = "Events for you in $city"
         }
-        tvMainFeedHeadline.text
     }
 
     private fun eventChangeListener() {

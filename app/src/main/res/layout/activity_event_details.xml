@@ -132,39 +132,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvEventDetailDescription" />
 
-        <FrameLayout
-            android:id="@+id/flRSVP"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRSVP"
+            android:layout_width="340dp"
+            android:layout_height="60dp"
+            android:layout_margin="0dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/arial_ce_bold"
+            android:text="RSVP"
+            android:textSize="13.5dp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/primary_salmon"
+            app:cornerRadius="50dp"
+            app:iconTint="@color/primary_salmon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/dividerEventDetail">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRSVP"
-                android:layout_width="340dp"
-                android:layout_height="60dp"
-                android:layout_margin="24dp"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/arial_ce_bold"
-                android:text="RSVP"
-                android:textSize="13.5dp"
-                android:textStyle="bold"
-                app:backgroundTint="@color/primary_salmon"
-                app:cornerRadius="50dp"
-                app:iconTint="@color/primary_salmon"
-                app:strokeColor="@color/primary_salmon" />
-
-        </FrameLayout>
+            app:layout_constraintTop_toBottomOf="@+id/dividerEventDetail"
+            app:strokeColor="@color/primary_salmon" />
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapView"
             android:layout_width="360dp"
             android:layout_height="216dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/flRSVP" />
+            app:layout_constraintTop_toBottomOf="@+id/btnRSVP" />
 
         <TextView
             android:id="@+id/textView8"

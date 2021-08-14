@@ -1,5 +1,6 @@
 package com.sundbean.raise
 
+import android.content.Intent
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -34,15 +35,23 @@ class EventDetailsActivity : AppCompatActivity() {
                 val imgUrl = document.getString("photoUrl")
                 Glide.with(this).load(imgUrl).override(Resources.getSystem().getDisplayMetrics().widthPixels).into(displayImageView)
                 tvEventDetailTitle.text = document.getString("name")
-                val attendees = document.get("attendees") as ArrayList<String>
-                var numAttendees = attendees.size as String
-                tvNumberOfAttendees.text = numAttendees + " going"
+                var numAttendees = document.get("rsvpNum")
+                tvNumberOfAttendees.text = "$numAttendees going"
                 tvEventDetailTime.text = document.getString("time")
 
             }
             .addOnFailureListener { e ->
                 Log.d(TAG, "Error getting document reference: $e")
             }
+
+        ibBackButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            //get rid of any Login or Register Activities running in the background
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+
+        }
 
     }
 
