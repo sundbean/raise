@@ -40,6 +40,7 @@ import kotlinx.android.synthetic.main.activity_create_event.*
 import kotlinx.android.synthetic.main.activity_create_event.ivEventPhoto
 import kotlinx.android.synthetic.main.activity_event_details.*
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -77,6 +78,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private val TAG = "CreateEventActivity"
     private var cal = Calendar.getInstance()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_event)
@@ -217,14 +219,14 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun pickTime(startOrEnd : String) {
         val mcurrentTime = Calendar.getInstance()
         val hour = mcurrentTime.get(Calendar.HOUR_OF_DAY)
         val minute = mcurrentTime.get(Calendar.MINUTE)
 
-        TimePickerDialog(this, object : TimePickerDialog.OnTimeSetListener {
-            @RequiresApi(Build.VERSION_CODES.O)
-            override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+        TimePickerDialog(this,
+            { view, hourOfDay, minute ->
                 val time = LocalTime.of(hourOfDay, minute)
                 if (startOrEnd == "start") {
                     eventStartTime = time
@@ -235,29 +237,23 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     tvEndTime.text = time.toString()
                     tvEndTime.setTextColor(Color.parseColor("#000000"))
                 }
-            }
-        }, hour, minute, false).show()
+            }, hour, minute, false).show()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun pickDate() {
         cal = Calendar.getInstance()
         val year = cal.get(Calendar.YEAR)
         val month = cal.get(Calendar.MONTH)
         val day = cal.get(Calendar.DAY_OF_MONTH)
 
-        val dpd = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-            //TODO: BUG! For some reason, selectedDate ends up being today's date, or at least that's how its saving in the database
-            val displayFormat = "MM/dd/yyyy"
-            val displaySdf = SimpleDateFormat(displayFormat, Locale.US)
-            val storageFormat = "yyyy-MM-dd"
-            val storageSdf = SimpleDateFormat(storageFormat, Locale.US)
+        DatePickerDialog(this, { view, year, monthOfYear, dayOfMonth ->
+            val date = LocalDate.of(year, monthOfYear, dayOfMonth)
             // need to change this to black because its gray when Activity first loads
             tvDate!!.setTextColor(resources.getColor(R.color.black))
-            tvDate!!.text = displaySdf.format(cal.getTime())
-            selectedDate = storageSdf.format(cal.getTime())
-        }, year, month, day)
-
-        dpd.show()
+            tvDate!!.text = date.toString()
+            selectedDate = date.toString()
+        }, year, month, day).show()
     }
 
 
