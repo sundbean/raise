@@ -1,5 +1,3 @@
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,15 +9,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.type.Date
-import com.google.type.DateTime
 import com.sundbean.raise.*
 import com.sundbean.raise.R
 import kotlinx.android.synthetic.main.activity_event_confirmation.*
 import kotlinx.android.synthetic.main.fragment_main_feed2.*
 import kotlinx.android.synthetic.main.fragment_organize.*
 import java.util.*
-import java.util.EventListener
+
 
 class MainFeedFragment:Fragment(R.layout.fragment_main_feed2) {
 
@@ -87,7 +83,10 @@ class MainFeedFragment:Fragment(R.layout.fragment_main_feed2) {
                     // loop through all the documents
                     for (dc : DocumentChange in value?.documentChanges!!) {
                         if (dc.type == DocumentChange.Type.ADDED){
-                            opportunityArrayList.add(dc.document.toObject(Opportunity::class.java))
+                            var opportunity = dc.document.toObject(Opportunity::class.java)
+                            opportunity.setuid(dc.document.id)
+                            Log.d("Firestore debug", "opportunity object is : $opportunity")
+                            opportunityArrayList.add(opportunity)
                         }
                     }
                     feedItemAdapter.notifyDataSetChanged()

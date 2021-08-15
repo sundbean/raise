@@ -1,17 +1,17 @@
 package com.sundbean.raise
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.feed_card_layout.view.*
 import java.time.LocalTime
 
 class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var context : Context) :
@@ -54,6 +54,12 @@ class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var con
 
         Glide.with(context!!).load(opportunity.photoUrl).centerCrop().into(holder.oppPhoto)
 
+        // make it clickable - this is technically bad practice but I dont understand the better way: https://medium.com/android-gate/recyclerview-item-click-listener-the-right-way-daecc838fbb9
+        holder.itemView.setOnClickListener {
+            val intent = Intent(context, EventDetailsActivity::class.java)
+            intent.putExtra("event_id", opportunity.id)
+            context.startActivity(intent)
+        }
 
     }
 
@@ -61,7 +67,7 @@ class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var con
         return modelList.size
     }
 
-    public class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val oppPhoto : ImageView = itemView.findViewById(R.id.ivFeedCardPhoto)
         val oppIcon : ImageView = itemView.findViewById(R.id.ivOpportunityTypeIcon)
