@@ -23,7 +23,6 @@ import com.bumptech.glide.Glide
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.AddressComponents
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
@@ -39,10 +38,8 @@ import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.activity_create_event.*
 import kotlinx.android.synthetic.main.activity_create_event.ivEventPhoto
 import kotlinx.android.synthetic.main.activity_event_details.*
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
@@ -84,7 +81,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         setContentView(R.layout.activity_create_event)
 
         rgOrganizer = findViewById(R.id.rgOrganizer)
-        btnCreateEvent = findViewById(R.id.btnRSVP)
+        btnCreateEvent = findViewById(R.id.btnJoinGroup)
         etEventName = findViewById(R.id.etEventName)
         tvDate = findViewById(R.id.tvDate)
         flDate = findViewById(R.id.flEventDate)
@@ -296,7 +293,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
     private fun setImage(uri: Uri?) {
         // take down the upload icon
-        ivUploadIcon.setImageResource(0)
+        llUploadPhotoCE.visibility = View.GONE
         // use glide to set the image
         Glide.with(this)
             .load(uri)

@@ -16,7 +16,7 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-
+        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -74,6 +74,5 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-storage:7.2.0'
     // android image cropper
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
-    // for recyclerview with cardviews
 
 }

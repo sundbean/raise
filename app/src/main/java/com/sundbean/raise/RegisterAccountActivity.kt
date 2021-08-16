@@ -228,7 +228,7 @@ class RegisterAccountActivity : AppCompatActivity() {
         val db = Firebase.firestore
         val data = hashMapOf(
             "name" to etFullName.text.toString().trim(),
-            "profileImageUrl" to profileImageUrl
+            "photoUrl" to profileImageUrl
         )
 
         db.collection("users").document(uid).set(data)

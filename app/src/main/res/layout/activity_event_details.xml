@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/svEventDetailsPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -22,7 +23,7 @@
             app:srcCompat="@drawable/ic_back_button_salmon_foreground" />
 
         <ImageView
-            android:id="@+id/ivEventDetailsImage"
+            android:id="@+id/ivGroupDetailImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -33,7 +34,7 @@
             app:srcCompat="@drawable/ic_event_black_large_foreground" />
 
         <TextView
-            android:id="@+id/tvEventDetailTitle"
+            android:id="@+id/tvGroupDetailTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -43,10 +44,10 @@
             android:textSize="27dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ivEventDetailsImage" />
+            app:layout_constraintTop_toBottomOf="@+id/ivGroupDetailImage" />
 
         <TextView
-            android:id="@+id/tvNumberOfAttendees"
+            android:id="@+id/tvNumberOfMembers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -57,7 +58,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailTitle" />
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailTitle" />
 
         <LinearLayout
             android:id="@+id/llEventDetailEventAndTimeHolder"
@@ -65,7 +66,7 @@
             android:layout_height="32dp"
             android:layout_marginTop="16dp"
             android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@+id/tvNumberOfAttendees">
+            app:layout_constraintTop_toBottomOf="@+id/tvNumberOfMembers">
 
             <TextView
                 android:id="@+id/tvEventDetailTime"
@@ -98,7 +99,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tvEventDetailDescriptionTitle"
+            android:id="@+id/tvGroupDetailAboutTitle"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -112,7 +113,7 @@
             app:layout_constraintTop_toBottomOf="@+id/llEventDetailEventAndTimeHolder" />
 
         <TextView
-            android:id="@+id/tvEventDetailDescription"
+            android:id="@+id/tvGroupDetailAbout"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
@@ -121,7 +122,7 @@
             android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailDescriptionTitle" />
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailAboutTitle" />
 
         <View
             android:id="@+id/dividerEventDetail"
@@ -131,13 +132,12 @@
             android:background="?android:attr/listDivider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailDescription" />
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailAbout" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRSVP"
+            android:id="@+id/btnJoinGroup"
             android:layout_width="340dp"
             android:layout_height="60dp"
-            android:layout_margin="0dp"
             android:layout_marginTop="16dp"
             android:fontFamily="@font/arial_ce_bold"
             android:text="RSVP"
@@ -155,16 +155,16 @@
             android:id="@+id/mapView"
             android:layout_width="360dp"
             android:layout_height="216dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnRSVP" />
+            app:layout_constraintTop_toBottomOf="@+id/btnJoinGroup" />
 
         <TextView
             android:id="@+id/textView8"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="32dp"
             android:fontFamily="@font/arial_bold"
             android:text="About the Organizer"
             android:textAllCaps="true"
@@ -177,7 +177,7 @@
         <LinearLayout
             android:id="@+id/llEventDetailEventOrganizerLabel"
             android:layout_width="360dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
@@ -186,8 +186,8 @@
 
             <ImageView
                 android:id="@+id/ivEventDetailOrganizerImage"
-                android:layout_width="112dp"
-                android:layout_height="wrap_content"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 app:srcCompat="@drawable/ic_explore_foreground" />
 
             <LinearLayout
@@ -247,27 +247,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvEventDetailOrganizerAbout" />
 
-        <ImageView
-            android:id="@+id/imageView4"
+        <LinearLayout
+            android:id="@+id/llReturnToTop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailEventOrganizerMoreLink"
-            app:srcCompat="@drawable/ic_up_arrow_salmon_foreground" />
+            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailEventOrganizerMoreLink">
 
-        <TextView
-            android:id="@+id/tvEventDetailReturnToTop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Return To Top"
-            android:textAllCaps="true"
-            android:textColor="@color/primary_salmon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView4" />
+            <ImageView
+                android:id="@+id/ivReturnToTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                app:srcCompat="@drawable/ic_up_arrow_salmon_foreground" />
+
+            <TextView
+                android:id="@+id/tvEventDetailReturnToTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Return To Top"
+                android:textAllCaps="true"
+                android:textColor="@color/primary_salmon" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

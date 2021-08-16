@@ -39,37 +39,47 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvCreateGroupPageTitle">
 
-            <LinearLayout
-                android:id="@+id/llUploadPhotoContainerCG"
+            <RelativeLayout
+                android:id="@+id/rlUploadImageCG"
                 android:layout_width="match_parent"
                 android:layout_height="260dp"
-                android:background="@drawable/background_navy_rectangle"
-                android:orientation="horizontal">
+                android:background="@color/white"
+                app:layout_constraintTop_toBottomOf="@+id/tvCreateGroupPageTitle">
+
+                <ImageView
+                    android:id="@+id/ivGroupPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="5dip"
+                    android:layout_marginBottom="5dip"
+                    android:adjustViewBounds="true"
+                    app:srcCompat="@drawable/background_navy_rectangle" />
 
                 <LinearLayout
-                    android:id="@+id/llUploadContentContainerCG"
-                    android:layout_width="match_parent"
+                    android:id="@+id/llUploadPhotoCG"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_centerInParent="true"
                     android:orientation="vertical">
 
                     <ImageView
                         android:id="@+id/ivUploadIconCG"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        app:srcCompat="@drawable/ic_upload_white_foreground" />
+                        app:srcCompat="@mipmap/ic_upload_gf_foreground"
+                        app:tint="@color/white" />
 
                     <TextView
-                        android:id="@+id/tvUploadTextCG"
-                        android:layout_width="match_parent"
+                        android:id="@+id/tvUploadPhotoCG"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:fontFamily="@font/arial_ce"
                         android:text="Upload Photo"
-                        android:textAlignment="center"
                         android:textColor="@color/white" />
                 </LinearLayout>
-            </LinearLayout>
+
+            </RelativeLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/clTextFormCG"
@@ -93,20 +103,33 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <EditText
-                    android:id="@+id/etLocationCG"
-                    android:layout_width="380dp"
-                    android:layout_height="wrap_content"
+                <FrameLayout
+                    android:id="@+id/flLocationEditCG"
+                    android:layout_width="370dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="8dp"
-                    android:ems="10"
-                    android:drawableLeft="@drawable/ic_location"
-                    android:drawablePadding="10dp"
-                    android:drawableStart="@drawable/ic_location"
-                    android:hint="Location"
-                    android:inputType="textPostalAddress"
+                    android:background="@drawable/autocomplete_line"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/etGroupName" />
+                    app:layout_constraintTop_toBottomOf="@+id/etGroupName">
+
+                    <TextView
+                        android:id="@+id/tvAutocompleteHintCG"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="27dp"
+                        android:paddingTop="20dp"
+                        android:text="Location"
+                        android:textSize="18dp" />
+
+                    <fragment
+                        android:id="@+id/afCreateGroup"
+                        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="0dp"
+                        android:hint="" />
+                </FrameLayout>
 
 
                 <LinearLayout
@@ -119,7 +142,7 @@
                     android:paddingTop="0dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/etLocationCG">
+                    app:layout_constraintTop_toBottomOf="@+id/flLocationEditCG">
 
                     <ImageView
                         android:layout_width="wrap_content"

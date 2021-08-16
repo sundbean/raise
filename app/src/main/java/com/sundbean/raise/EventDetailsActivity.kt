@@ -5,7 +5,6 @@ import android.content.res.Resources
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
@@ -16,11 +15,14 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_event_details.*
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -28,8 +30,14 @@ import java.util.*
 
 class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
 
+    private lateinit var db : FirebaseFirestore
     private lateinit var mapView: MapView
     private lateinit var displayImageView : ImageView
+    private lateinit var organizerRef : DocumentReference
+    private lateinit var eventRef : DocumentReference
+    private lateinit var eventDoc : DocumentSnapshot
+    private lateinit var eventId : String
+    private var userUid : String? = null
     private var latitude : Double? = null
     private var longitude : Double? = null
     private var TAG = "EventDetailsActivity"
@@ -43,76 +51,181 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_details)
 
-        displayImageView = findViewById(R.id.ivEventDetailsImage)
+        db = Firebase.firestore
+        displayImageView = findViewById(R.id.ivGroupDetailImage)
         mapView = findViewById(R.id.mapView)
+        userUid = FirebaseAuth.getInstance().currentUser?.uid
+        eventId = intent.getStringExtra("event_id") as String
 
-        val intent = getIntent()
-        val eventId = intent.getStringExtra("event_id") as String
-
-        //TODO: Find a way to implement this in helper function fillViewsWithDataFromFirestore, so we dont make two queries to firestore in same activity
-        Firebase.firestore.collection("events").document(eventId).get().addOnSuccessListener { document ->
-            var location = document.get("location") as Map<*, *>
-            var coordinates = location.get("coordinates") as Map<String, Double>
-            latitude = coordinates["latitude"]
-            longitude = coordinates["longitude"]
-        }
+        // retrieveEventData() -> prepareCoordinatesForMapDisplay(), fillViewsWithDataFromFirestore(), setClickListeners()
+        retrieveEventData()
 
         val mapViewBundle = savedInstanceState?.getBundle(MAPVIEW_BUNDLE_KEY)
         mapView.onCreate(mapViewBundle)
         mapView.getMapAsync(this)
 
-        fillViewsWithDataFromFirestore(eventId)
-
-        ibBackButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            //get rid of any Login or Register Activities running in the background
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
-
-        }
-
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun fillViewsWithDataFromFirestore(eventId: String) {
+    private fun retrieveEventData() {
         /**
-         * Queries firestore 'events' collection using the [eventId]. Gets values of various fields and displays them in appropriate
-         * layout views.
+         * Gets event document from firestore, then executes sub-methods to use the event's data to fill layout's views.
+         * These sub-methods are nested in this method, because they depend on initialization of the lateinit variables [eventDoc]
+         * and [eventRef]
          */
-        val db = Firebase.firestore
-        val eventRef = db.collection("events").document(eventId)
+        eventRef = db.collection("events").document(eventId)
         eventRef.get()
             .addOnSuccessListener { document ->
-                // load event photo
-                val imgUrl = document.getString("photoUrl")
-                Glide.with(this).load(imgUrl).override(Resources.getSystem().getDisplayMetrics().widthPixels).into(displayImageView)
-
-                tvEventDetailTitle.text = document.getString("name")
-
-                // display number of attendees
-                var numAttendees = document.get("rsvpNum")
-                tvNumberOfAttendees.text = "$numAttendees going"
-
-                // display event time
-                var startTime = formatFirestoreTimeToDisplayString(document.get("startTime") as Map<String, Int?>)
-                var endTime = formatFirestoreTimeToDisplayString(document.get("endTime") as Map<String, Int?>)
-                tvEventDetailTime.text = "$startTime-$endTime"
-
-                //display event date
-                var date : String = formatDateForDisplay(document.getString("date"))
-                tvEventDetailDate.text = date
-
-                // display event description
-                tvEventDetailDescription.text = document.getString("description")
-
-                // display organizer information
-
-
+                eventDoc = document
+                // sub-methods
+                prepareCoordinatesForMapDisplay()
+                fillViewsWithDataFromFirestore()
+                setClickListeners()
             }
             .addOnFailureListener { e ->
                 Log.d(TAG, "Error getting document reference: $e")
             }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun prepareCoordinatesForMapDisplay() {
+        /**
+         * Populates latitude and longitude lateinit variables. These coordinates will be used
+         */
+        val location = eventDoc.get("location") as Map<*, *>
+        val coordinates = location.get("coordinates") as Map<*, Double>
+        latitude = coordinates["latitude"]
+        longitude = coordinates["longitude"]
+    }
+
+
+    private fun setClickListeners() {
+        ibBackButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
+
+        btnJoinGroup.setOnClickListener {
+            if (btnJoinGroup.text == "RSVP") {
+                eventRef.update("attendees", FieldValue.arrayUnion(userUid))
+                btnJoinGroup.text = "cancel RSVP"
+            } else {
+                eventRef.update("attendees", FieldValue.arrayRemove(userUid))
+                btnJoinGroup.text = "RSVP"
+            }
+        }
+
+        llReturnToTop.setOnClickListener {
+            svEventDetailsPage.scrollTo(0,0)
+        }
+
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun fillViewsWithDataFromFirestore() {
+        displayImage()
+        displayEventTitle()
+        displayNumberOfAttendees()
+        displayEventTime()
+        displayEventDate()
+        displayEventDescription()
+        setRSVPButtonText()
+
+        // sets off cascade of method calls to display organizer data
+        retrieveOrganizerData()
+    }
+
+    private fun retrieveOrganizerData() {
+        Log.d(TAG, "I'm in retrieveOrganizerData")
+        val organizer = eventDoc.getString("organizer")!!
+        if (eventDoc.getString("organizerType") == "user") {
+            organizerRef = db.collection("users").document(organizer)
+        } else if (eventDoc.getString("organizerType") == "group") {
+            organizerRef = db.collection("groups").document(organizer)
+        } else {
+            Log.e(TAG, "Invalid organizerType: ${eventDoc.getString("organizerType")}")
+        }
+
+        organizerRef.get()
+            .addOnSuccessListener { doc ->
+                Log.d(TAG, "Organizer document successfully retrieved: $doc")
+                displayOrganizerTitle(doc)
+                displayOrganizerLocation(doc)
+                displayOrganizerPhoto(doc)
+                displayOrganizerAbout(doc)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error retrieving organizer document: $e")
+            }
+    }
+
+    private fun displayOrganizerAbout(doc: DocumentSnapshot?) {
+        if (doc != null) {
+            tvEventDetailOrganizerAbout.text = doc.getString("about")
+        }
+    }
+
+    private fun displayOrganizerPhoto(doc: DocumentSnapshot?) {
+        val imgUrl = doc?.getString("photoUrl")
+        Glide.with(this).load(imgUrl).into(ivEventDetailOrganizerImage)
+    }
+
+    private fun displayOrganizerLocation(doc: DocumentSnapshot?) {
+        val location = doc?.get("location") as Map<*, *>
+        val city = location.get("locality")
+        val state = convertStateNameToAbbreviation(location.get("admin") as String?)
+        tvEventDetailEventOrganizerCity.text = "$city, $state"
+    }
+
+    private fun displayOrganizerTitle(doc : DocumentSnapshot) {
+        Log.d(TAG, "I'm in displayOrganizerTitle")
+        tvEventDetailEventOrganizerName.text = doc.getString("name")
+    }
+
+    private fun setRSVPButtonText() {
+        val attendees = eventDoc.get("attendees") as ArrayList<*>
+        if (userUid in attendees) {
+            btnJoinGroup.text = "cancel RSVP"
+        } else {
+            btnJoinGroup.text = "RSVP"
+        }
+    }
+
+    private fun displayEventDescription() {
+        tvGroupDetailAbout.text = eventDoc.getString("description")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun displayEventDate() {
+        val date: String = formatDateForDisplay(eventDoc.getString("date"))
+        tvEventDetailDate.text = date
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun displayEventTime() {
+        val startTime =
+            formatFirestoreTimeToDisplayString(eventDoc.get("startTime") as Map<String, Int?>)
+        val endTime =
+            formatFirestoreTimeToDisplayString(eventDoc.get("endTime") as Map<String, Int?>)
+        tvEventDetailTime.text = "$startTime-$endTime"
+    }
+
+    private fun displayNumberOfAttendees() {
+        val numAttendees = eventDoc.get("rsvpNum")
+        tvNumberOfMembers.text = "$numAttendees going"
+    }
+
+    private fun displayEventTitle() {
+        tvGroupDetailTitle.text = eventDoc.getString("name")
+    }
+
+    private fun displayImage() {
+        val imgUrl = eventDoc.getString("photoUrl")
+        Glide.with(this).load(imgUrl)
+            .override(Resources.getSystem().getDisplayMetrics().widthPixels).into(displayImageView)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -135,7 +248,7 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
          * For example, "12:00PM"
          */
         var hour = timeMap!!["hour"]!!
-        var minute = timeMap!!["minute"]!!
+        val minute = timeMap!!["minute"]!!
         var meridian = "AM"
         if (hour >= 12) {
             meridian = "PM"
@@ -143,10 +256,13 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
                 hour -= 12
             }
         }
-        var displayTime = LocalTime.of(hour, minute)
+        val displayTime = LocalTime.of(hour, minute)
         return "$displayTime$meridian"
     }
 
+    /**
+     * The below methods are required for Google map display in MapView
+     */
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         val mapViewBundle = outState.getBundle(MAPVIEW_BUNDLE_KEY) ?: Bundle().also {
@@ -171,9 +287,9 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(map: GoogleMap) {
-        var coordinates = LatLng(latitude!!, longitude!!)
+        val coordinates = LatLng(latitude!!, longitude!!)
         map.addMarker(MarkerOptions().position(coordinates).title("Marker"))
-        var zoomLevel = 16.0f // this goes up to 21
+        val zoomLevel = 16.0f // this goes up to 21
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoomLevel))
     }
 
