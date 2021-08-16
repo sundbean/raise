@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/svEventDetailsPage"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="1600dp">
+
+        <ImageButton
+            android:id="@+id/ibBackButton"
+            android:layout_width="39dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_back_button_salmon_foreground" />
+
+        <ImageView
+            android:id="@+id/ivGroupDetailImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:adjustViewBounds="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ibBackButton"
+            app:srcCompat="@drawable/ic_event_black_large_foreground" />
+
+        <TextView
+            android:id="@+id/tvGroupDetailTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/bebas_neue_bold"
+            android:text="Group Title"
+            android:textColor="@color/primary_navy"
+            android:textSize="27dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ivGroupDetailImage" />
+
+        <TextView
+            android:id="@+id/tvNumberOfMembers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/arial_ce_bold"
+            android:text="# Members"
+            android:textColor="@color/primary_blue"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailTitle" />
+
+        <TextView
+            android:id="@+id/tvGroupDetailAboutTitle"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/arial_bold"
+            android:text="About"
+            android:textAllCaps="true"
+            android:textColor="@color/primary_navy"
+            android:textSize="19dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvNumberOfMembers" />
+
+        <TextView
+            android:id="@+id/tvGroupDetailEventsTitle"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/arial_bold"
+            android:text="Our Events"
+            android:textAllCaps="true"
+            android:textColor="@color/primary_navy"
+            android:textSize="19dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.509"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailAbout" />
+
+        <TextView
+            android:id="@+id/tvGroupDetailAbout"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/arial_ce"
+            android:text='"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."'
+            android:textSize="18dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailAboutTitle" />
+
+        <View
+            android:id="@+id/dividerEventDetail"
+            android:layout_width="409dp"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="8dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailAbout" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnJoinGroup"
+            android:layout_width="340dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/arial_ce_bold"
+            android:text="Join Group"
+            android:textSize="13.5dp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/primary_salmon"
+            app:cornerRadius="50dp"
+            app:iconTint="@color/primary_salmon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.492"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rvGroupDetailEvents"
+            app:strokeColor="@color/primary_salmon" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvGroupDetailEvents"
+            android:layout_width="409dp"
+            android:layout_height="202dp"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailEventsTitle" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

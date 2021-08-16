@@ -18,19 +18,19 @@
 
     <ImageView
         android:id="@+id/ivEventPhotoC"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:adjustViewBounds="true"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvEventConfirmationHeadline"
         app:srcCompat="@drawable/ic_explore_foreground" />
 
     <LinearLayout
         android:id="@+id/linearLayout2"
-        android:layout_width="409dp"
-        android:layout_height="141dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -141,11 +141,10 @@
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCreateEvent"
+        android:id="@+id/btnGoToEventDetail"
         android:layout_width="340dp"
         android:layout_height="60dp"
-        android:layout_margin="24dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:text="Go to Event Page"
         app:backgroundTint="@color/primary_salmon"
         app:cornerRadius="50dp"
@@ -154,6 +153,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
         app:strokeColor="@color/primary_salmon" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGoToMainFeed"
+        android:layout_width="340dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="8dp"
+        android:text="Go to Main Feed"
+        android:textColor="@color/primary_salmon"
+        app:backgroundTint="@color/white"
+        app:cornerRadius="50dp"
+        app:iconTint="@color/primary_salmon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnGoToEventDetail"
+        app:strokeColor="@color/primary_salmon"
+        app:strokeWidth="3dp" />
+
+
+
+
+
+
+
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

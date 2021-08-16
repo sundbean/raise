@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/svEventDetailsPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,44 +12,53 @@
         android:minHeight="1600dp">
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/ibBackButton"
             android:layout_width="39dp"
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
+            android:background="@color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_back_button_salmon_foreground" />
 
         <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="match_parent"
+            android:id="@+id/ivGroupDetailImage"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:adjustViewBounds="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageButton"
+            app:layout_constraintTop_toBottomOf="@+id/ibBackButton"
             app:srcCompat="@drawable/ic_event_black_large_foreground" />
 
         <TextView
-            android:id="@+id/tvEventDetailTitle"
+            android:id="@+id/tvGroupDetailTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="TextView"
+            android:fontFamily="@font/bebas_neue_bold"
+            android:text="Event Title"
+            android:textColor="@color/primary_navy"
+            android:textSize="27dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+            app:layout_constraintTop_toBottomOf="@+id/ivGroupDetailImage" />
 
         <TextView
-            android:id="@+id/tvNumberOfAttendees"
+            android:id="@+id/tvNumberOfMembers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="TextView"
+            android:fontFamily="@font/arial_ce_bold"
+            android:text="# Attending"
+            android:textColor="@color/primary_blue"
+            android:textSize="15dp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailTitle" />
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailTitle" />
 
         <LinearLayout
             android:id="@+id/llEventDetailEventAndTimeHolder"
@@ -56,48 +66,63 @@
             android:layout_height="32dp"
             android:layout_marginTop="16dp"
             android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@+id/tvNumberOfAttendees">
+            app:layout_constraintTop_toBottomOf="@+id/tvNumberOfMembers">
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/tvEventDetailTime"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginRight="0.5dp"
                 android:layout_weight="1"
                 android:background="@color/primary_blue"
                 android:backgroundTint="@color/primary_blue"
-                android:text="TextView" />
+                android:fontFamily="@font/arial_bold"
+                android:gravity="center"
+                android:text="TextView"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/tvEventDetailDate"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="0.5dp"
                 android:layout_weight="1"
                 android:background="@color/primary_blue"
-                android:text="TextView" />
+                android:fontFamily="@font/arial_bold"
+                android:gravity="center"
+                android:text="TextView"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tvEventDetailDescriptionTitle"
+            android:id="@+id/tvGroupDetailAboutTitle"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:fontFamily="@font/arial_bold"
             android:text="Description"
             android:textAllCaps="true"
+            android:textColor="@color/primary_navy"
+            android:textSize="19dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/llEventDetailEventAndTimeHolder" />
 
         <TextView
-            android:id="@+id/tvEventDetailDescription"
+            android:id="@+id/tvGroupDetailAbout"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:fontFamily="@font/arial_ce"
             android:text='"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."'
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailDescriptionTitle" />
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailAboutTitle" />
 
         <View
             android:id="@+id/dividerEventDetail"
@@ -107,15 +132,17 @@
             android:background="?android:attr/listDivider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailDescription" />
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupDetailAbout" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCreateEvent"
+            android:id="@+id/btnJoinGroup"
             android:layout_width="340dp"
             android:layout_height="60dp"
-            android:layout_margin="24dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/arial_ce_bold"
             android:text="RSVP"
+            android:textSize="13.5dp"
+            android:textStyle="bold"
             app:backgroundTint="@color/primary_salmon"
             app:cornerRadius="50dp"
             app:iconTint="@color/primary_salmon"
@@ -128,18 +155,21 @@
             android:id="@+id/mapView"
             android:layout_width="360dp"
             android:layout_height="216dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnCreateEvent" />
+            app:layout_constraintTop_toBottomOf="@+id/btnJoinGroup" />
 
         <TextView
             android:id="@+id/textView8"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/arial_bold"
             android:text="About the Organizer"
             android:textAllCaps="true"
+            android:textColor="@color/primary_navy"
+            android:textSize="19dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mapView" />
@@ -147,7 +177,7 @@
         <LinearLayout
             android:id="@+id/llEventDetailEventOrganizerLabel"
             android:layout_width="360dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
@@ -156,8 +186,8 @@
 
             <ImageView
                 android:id="@+id/ivEventDetailOrganizerImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 app:srcCompat="@drawable/ic_explore_foreground" />
 
             <LinearLayout
@@ -170,14 +200,24 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="TextView" />
+                    android:fontFamily="@font/arial_bold"
+                    android:gravity="bottom"
+                    android:paddingLeft="15dp"
+                    android:text="TextView"
+                    android:textColor="@color/primary_navy"
+                    android:textSize="19dp" />
 
                 <TextView
                     android:id="@+id/tvEventDetailEventOrganizerCity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="TextView" />
+                    android:fontFamily="@font/arial_bold"
+                    android:paddingLeft="15dp"
+                    android:paddingTop="5dp"
+                    android:text="TextView"
+                    android:textColor="@color/primary_blue"
+                    android:textSize="15dp" />
             </LinearLayout>
 
         </LinearLayout>
@@ -187,7 +227,9 @@
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:fontFamily="@font/arial_ce"
             android:text='"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."'
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/llEventDetailEventOrganizerLabel" />
@@ -205,27 +247,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvEventDetailOrganizerAbout" />
 
-        <ImageView
-            android:id="@+id/imageView4"
+        <LinearLayout
+            android:id="@+id/llReturnToTop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailEventOrganizerMoreLink"
-            app:srcCompat="@drawable/ic_up_arrow_salmon_foreground" />
+            app:layout_constraintTop_toBottomOf="@+id/tvEventDetailEventOrganizerMoreLink">
 
-        <TextView
-            android:id="@+id/tvEventDetailReturnToTop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Return To Top"
-            android:textAllCaps="true"
-            android:textColor="@color/primary_salmon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView4" />
+            <ImageView
+                android:id="@+id/ivReturnToTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                app:srcCompat="@drawable/ic_up_arrow_salmon_foreground" />
+
+            <TextView
+                android:id="@+id/tvEventDetailReturnToTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Return To Top"
+                android:textAllCaps="true"
+                android:textColor="@color/primary_salmon" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

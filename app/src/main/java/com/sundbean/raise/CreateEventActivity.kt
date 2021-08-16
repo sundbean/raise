@@ -1,20 +1,27 @@
 package com.sundbean.raise
 
 import android.app.Activity
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
+import android.content.res.Resources
+import android.graphics.Color
+import android.location.Geocoder
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
@@ -25,9 +32,14 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.sundbean.raise.BuildConfig.MAPS_API_KEY
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.activity_create_event.*
+import kotlinx.android.synthetic.main.activity_create_event.ivEventPhoto
+import kotlinx.android.synthetic.main.activity_event_details.*
+import java.time.LocalDate
+import java.time.LocalTime
 import java.util.*
 
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
@@ -35,49 +47,62 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private lateinit var causesRecyclerView : RecyclerView
     private lateinit var autocompleteFragment : AutocompleteSupportFragment
     private var selectedPlaceId: String? = null
+    private lateinit var selectedPlaceCoordinates: LatLng
     private var eventType : String? = null
     private lateinit var etEventName : EditText
+    private lateinit var tvDate : TextView
+    private lateinit var flDate : FrameLayout
     private lateinit var etDate : EditText
-    private lateinit var etTime : EditText
-//    private lateinit var etLocation: EditText
+    private lateinit var flStartTime : FrameLayout
+    private lateinit var tvStartTime : TextView
+    private lateinit var etStartTime : EditText
+    private lateinit var flEndTime : FrameLayout
+    private lateinit var tvEndTime : TextView
+    private lateinit var etEndTime : EditText
+    private lateinit var eventStartTime : LocalTime
+    private lateinit var eventEndTime : LocalTime
     private lateinit var etDescription : EditText
     private lateinit var rgOrganizer : RadioGroup
     private lateinit var rbOrganizer : RadioButton
     private lateinit var btnCreateEvent : Button
     private lateinit var eventOrganizerType : String
+    private lateinit var tvAutocompleteHint : TextView
     private lateinit var eventOrganizer : String
+    private lateinit var selectedDate : String
     private var selectedPhotoUri: Uri? = null
     private lateinit var url: String
-//    private lateinit var eventReference: Void
     private val GALLERY_REQUEST_CODE = 1234
     private val TAG = "CreateEventActivity"
+    private var cal = Calendar.getInstance()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_event)
 
         rgOrganizer = findViewById(R.id.rgOrganizer)
-        btnCreateEvent = findViewById(R.id.btnCreateEvent)
+        btnCreateEvent = findViewById(R.id.btnJoinGroup)
         etEventName = findViewById(R.id.etEventName)
+        tvDate = findViewById(R.id.tvDate)
+        flDate = findViewById(R.id.flEventDate)
         etDate = findViewById(R.id.etDate)
-        etTime = findViewById(R.id.etTime)
-//        etLocation = findViewById(R.id.etLocation)
+        etStartTime = findViewById(R.id.etStartTime)
+        flStartTime = findViewById(R.id.flEventStartTime)
+        tvStartTime = findViewById(R.id.tvStartTime)
+        etEndTime = findViewById(R.id.etEndTime)
+        tvEndTime = findViewById(R.id.tvEndTime)
+        flEndTime = findViewById(R.id.flEventEndTime)
         etDescription = findViewById(R.id.etDescription)
         rgOrganizer = findViewById(R.id.rgOrganizer)
+        tvAutocompleteHint = findViewById(R.id.tvAutocompleteHint)
         url = ""
-
-        // get device screen dimensions and use them to set the event image to 16/9 aspect ratio
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        var screenWidth = displayMetrics.widthPixels
-        ivEventPhoto.getLayoutParams().height = (16/9) * screenWidth
 
         // when the event photo container is clicked, the user wants to pick a photo
         rlUploadImage.setOnClickListener {
             pickImageFromGallery()
         }
 
-
+        // Handling event type input
         val eventTypeSpinner : Spinner = findViewById(R.id.spinnerEventType)
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
@@ -91,6 +116,18 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             eventTypeSpinner.adapter = adapter
         }
 
+
+        tvDate.setOnClickListener {
+            pickDate()
+        }
+
+        tvStartTime.setOnClickListener {
+            pickTime("start")
+        }
+
+        tvEndTime.setOnClickListener {
+            pickTime("end")
+        }
 
         // Make the causes recycler view
         causesRecyclerView = findViewById(R.id.rvChooseEventCauses)
@@ -130,11 +167,12 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         var fView : View? = autocompleteFragment.view
         var etTextInput : EditText = fView!!.findViewById(R.id.places_autocomplete_search_input)
         etTextInput.setTextSize(16.0f)
-        etTextInput.setHint("Location")
 
+        // make the autocomplete icon line up with the other icons
+        autocompleteFragment.view?.setPadding(-40, 0, 0, 0)
 
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.ADDRESS_COMPONENTS))
 
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
@@ -142,7 +180,8 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 // TODO: Get info about the selected place.
                 // using the place id: https://developers.google.com/maps/documentation/places/web-service/place-id
                 selectedPlaceId = place.id
-                Log.i("LocationActivity", "Place: ${place.name}, ${place.id}")
+                selectedPlaceCoordinates = place.latLng!!
+                tvAutocompleteHint.setVisibility(View.GONE)
             }
 
             override fun onError(status: Status) {
@@ -152,7 +191,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         })
 
         //TODO: find a way to hide this api key!
-        Places.initialize(applicationContext, "AIzaSyB_A0RKs7JmFRfMvokjaUYPnDvciHNyheU")
+        Places.initialize(applicationContext, MAPS_API_KEY)
         val placesClient = Places.createClient(this)
 
         btnCreateEvent.setOnClickListener {
@@ -176,6 +215,44 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         }
 
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun pickTime(startOrEnd : String) {
+        val mcurrentTime = Calendar.getInstance()
+        val hour = mcurrentTime.get(Calendar.HOUR_OF_DAY)
+        val minute = mcurrentTime.get(Calendar.MINUTE)
+
+        TimePickerDialog(this,
+            { view, hourOfDay, minute ->
+                val time = LocalTime.of(hourOfDay, minute)
+                if (startOrEnd == "start") {
+                    eventStartTime = time
+                    tvStartTime.text = time.toString()
+                    tvStartTime.setTextColor(Color.parseColor("#000000"))
+                } else if (startOrEnd == "end") {
+                    eventEndTime = time
+                    tvEndTime.text = time.toString()
+                    tvEndTime.setTextColor(Color.parseColor("#000000"))
+                }
+            }, hour, minute, false).show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun pickDate() {
+        cal = Calendar.getInstance()
+        val year = cal.get(Calendar.YEAR)
+        val month = cal.get(Calendar.MONTH)
+        val day = cal.get(Calendar.DAY_OF_MONTH)
+
+        DatePickerDialog(this, { view, year, monthOfYear, dayOfMonth ->
+            val date = LocalDate.of(year, monthOfYear, dayOfMonth)
+            // need to change this to black because its gray when Activity first loads
+            tvDate!!.setTextColor(resources.getColor(R.color.black))
+            tvDate!!.text = date.toString()
+            selectedDate = date.toString()
+        }, year, month, day).show()
+    }
+
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         TODO("Not yet implemented")
@@ -216,10 +293,11 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
     private fun setImage(uri: Uri?) {
         // take down the upload icon
-        ivUploadIcon.setImageResource(0)
+        llUploadPhotoCE.visibility = View.GONE
         // use glide to set the image
         Glide.with(this)
             .load(uri)
+            .override(Resources.getSystem().getDisplayMetrics().widthPixels)
             .into(ivEventPhoto)
     }
 
@@ -241,8 +319,10 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     }
 
     private fun uploadImageToFirebaseStorage(eventRef : DocumentReference) {
+        Log.d(TAG, "I'm inside uploadImageToFirebaseStorage")
+
         if (selectedPhotoUri == null) {
-            //TODO: make profile picture optional
+            Log.d(TAG, "selectedPhotoUri was null so not uploaded to storage")
             return
         }
 
@@ -274,27 +354,27 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            TextUtils.isEmpty(etDate.text.toString().trim()) -> {
+            TextUtils.isEmpty(tvDate.text.toString().trim()) -> {
                 Toast.makeText(
                     this@CreateEventActivity,
                     "Please add an event date.",
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            TextUtils.isEmpty(etTime.text.toString().trim()) -> {
+            TextUtils.isEmpty(tvStartTime.text.toString().trim()) -> {
                 Toast.makeText(
                     this@CreateEventActivity,
-                    "Please add an event time.",
+                    "Please add an event start time.",
                     Toast.LENGTH_SHORT
                 ).show()
             }
-//            TextUtils.isEmpty(etLocation.text.toString().trim()) -> {
-//                Toast.makeText(
-//                    this@CreateEventActivity,
-//                    "Please add an event location.",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//            }
+            TextUtils.isEmpty(tvEndTime.text.toString().trim()) -> {
+                Toast.makeText(
+                    this@CreateEventActivity,
+                    "Please add an event end time.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
             TextUtils.isEmpty(etDescription.text.toString().trim()) -> {
                 Toast.makeText(
                     this@CreateEventActivity,
@@ -313,9 +393,6 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             else -> {
                 Log.d("CreateEventActivity", "I've made it into performEventCreation() and am about to save to Firestore")
                 val eventName: String = etEventName.text.toString().trim()
-                val eventDate: String = etDate.text.toString().trim()
-                val eventTime: String = etTime.text.toString().trim()
-//                val eventLocation: String = etLocation.text.toString().trim()
                 val eventDescription: String = etDescription.text.toString().trim()
 
                 var currentUserUID = FirebaseAuth.getInstance().uid ?: ""
@@ -323,19 +400,24 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 val db = Firebase.firestore
                 var userRef = db.collection("users").document(uid)
 
+                var locationData = getLocationDataFromCoordinates(selectedPlaceCoordinates)
+
                 // save event to Firestore events collection
                 val data = hashMapOf(
                     "name" to eventName,
                     "photoUrl" to "",
+                    "oppType" to "event",
                     "type" to eventType,
-                    "date" to eventDate,
-                    "time" to eventTime,
-                    "location" to selectedPlaceId,
+                    "date" to selectedDate,
+                    "startTime" to eventStartTime,
+                    "endTime" to eventEndTime,
+                    "location" to locationData,
                     "organizerType" to eventOrganizerType,
                     "organizer" to eventOrganizer,
                     "description" to eventDescription,
                     "createdBy" to FirebaseAuth.getInstance().uid,
-                    "attendees" to listOf(userRef.id)
+                    "attendees" to listOf(userRef.id),
+                    "rsvpNum" to 1
                 )
                 Log.i(TAG, "User reference is: $userRef and uid is ${FirebaseAuth.getInstance().uid}")
                 db.collection("events").add(data)
@@ -358,4 +440,16 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         }
     }
 
+    private fun getLocationDataFromCoordinates(coordinates: LatLng): Any? {
+        var geocoder = Geocoder(this@CreateEventActivity, Locale.US)
+        val addresses = geocoder.getFromLocation(coordinates.latitude, coordinates.longitude, 1)
+        return hashMapOf (
+            "address" to addresses[0].getAddressLine(0),
+            "coordinates" to coordinates,
+            "placeId" to selectedPlaceId,
+            "locality" to addresses[0].locality,
+            "admin" to addresses[0].adminArea,
+            "subAdmin" to addresses[0].subAdminArea,
+            "postalCode" to addresses[0].postalCode)
+    }
 }
