@@ -20,13 +20,14 @@ class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var con
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): MainFeedItemAdapter.MyViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.feed_card_layout, parent, false)
+    ): MyViewHolder {
+        // I changed this from "parent.context" to "context" and I dont think it broke anything, but just a note for later in case it did...
+        val itemView = LayoutInflater.from(context).inflate(R.layout.feed_card_layout, parent, false)
         return MyViewHolder(itemView)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onBindViewHolder(holder: MainFeedItemAdapter.MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val opportunity : Opportunity = modelList[position]
 
         var time = opportunity.startTime
