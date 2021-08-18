@@ -24,7 +24,8 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
     private lateinit var exploreFeedHeadline: TextView
     private lateinit var yourEventsRecyclerView: RecyclerView
     private lateinit var yourEventsArrayList: ArrayList<Opportunity>
-    private lateinit var userEvents: MutableList<DocumentSnapshot>
+    private lateinit var popularGroupsRecyclerView: RecyclerView
+    private lateinit var groupsArrayList: ArrayList<Opportunity>
     private var db = Firebase.firestore
     private var currentUserUID = FirebaseAuth.getInstance().uid ?: ""
     private var currentUserRef = db.collection("users").document(currentUserUID)
@@ -35,16 +36,35 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
         super.onViewCreated(view, savedInstanceState)
 
         yourEventsRecyclerView = view.findViewById(R.id.rvRSVPEventsComingUp)
-        exploreFeedHeadline = view.findViewById(R.id.tvWhatsInYourLocation)
         yourEventsArrayList = arrayListOf()
+        popularGroupsRecyclerView = view.findViewById(R.id.rvPopularGroupsInYourLocation)
+        groupsArrayList = arrayListOf()
+        exploreFeedHeadline = view.findViewById(R.id.tvWhatsInYourLocation)
 
         currentUserRef.get().addOnSuccessListener { userDoc ->
             setLocation(userDoc)
             initYourEventsRecyclerView(userDoc)
-
         }
 
         initSearch()
+        initPopularGroupsRecyclerView()
+
+    }
+
+    private fun initPopularGroupsRecyclerView() {
+        /**
+         * Right now, this just puts all groups in the recyclerview for presentation purposes.
+         * Future intention: Query the database for the most popular groups in the user's selected location and display those.
+         */
+        popularGroupsRecyclerView.setHasFixedSize(true)
+
+//         make it horizontal
+        val horizontalLayoutManager =
+            LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
+        popularGroupsRecyclerView.layoutManager = horizontalLayoutManager
+
+        val eventsItemAdapter = EventFeedItemAdapter(yourEventsArrayList, requireActivity())
+        popularGroupsRecyclerView.adapter = eventsItemAdapter
 
     }
 
@@ -84,10 +104,6 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
             LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
         yourEventsRecyclerView.layoutManager = horizontalLayoutManager
 
-//        val userEventUids = userDoc.get("events") as ArrayList<String>
-//        userEvents = mutableListOf()
-//        Log.d(TAG, "userEventUids: $userEventUids")
-
         val eventsItemAdapter = EventFeedItemAdapter(yourEventsArrayList, requireActivity())
         yourEventsRecyclerView.adapter = eventsItemAdapter
 
@@ -108,10 +124,5 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
                     eventsItemAdapter.notifyDataSetChanged()
                 }
         }
-
-
-        Log.d(TAG, "userEvents: $userEvents")
-        Log.d(TAG, "yourEventsArrayList: $yourEventsArrayList")
-
     }
 }

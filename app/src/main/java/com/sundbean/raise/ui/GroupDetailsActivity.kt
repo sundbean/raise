@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -26,6 +27,7 @@ class GroupDetailsActivity : AppCompatActivity() {
     private lateinit var feedItemAdapter : EventFeedItemAdapter
     private lateinit var db: FirebaseFirestore
     private var userUid : String? = null
+    private lateinit var userRef : DocumentReference
     private lateinit var eventsArrayList : ArrayList<Opportunity>
     private var TAG = "GroupDetailsActivity"
 
@@ -38,6 +40,8 @@ class GroupDetailsActivity : AppCompatActivity() {
         eventsArrayList = arrayListOf()
         eventsRecyclerView = findViewById(R.id.rvGroupDetailEvents)
         groupId = intent.getStringExtra("group_id") as String
+        userUid = FirebaseAuth.getInstance().currentUser?.uid
+        userRef = userUid?.let { db.collection("users").document(it) }!!
 
         retrieveGroupData()
         initRecyclerView()
@@ -62,12 +66,29 @@ class GroupDetailsActivity : AppCompatActivity() {
     }
 
     private fun setClickListeners() {
+        /**
+         * Sets click listeners for the back button and Join Group button.
+         * A Join Group button click executes a series of actions depending on if the user is a member of the group (signified by
+         * whether the button text is displaying "Join Group" or "Leave Group", which is initially set in [setJoinGroupButtonText()]). If the user
+         * is already a member and is choosing to "Leave Group", we remove the group from the database's user document and we remove the user
+         * from the database's group document to reflect the change. If the user is choosing to "Join Group", then we do the opposite. After the
+         * database has been updated, the button text is changed so that the next time the user clicks, the action taken reflects the
+         * current state of the database.
+         */
         ibBackButton.setOnClickListener {
             finish()
         }
 
         btnJoinGroup.setOnClickListener {
-
+            if (btnJoinGroup.text == "Join Group") {
+                groupRef.update("members", FieldValue.arrayUnion(userRef))
+                userRef.update("groups", FieldValue.arrayUnion(groupRef))
+                btnJoinGroup.text = "Leave Group"
+            } else {
+                groupRef.update("members", FieldValue.arrayRemove(userRef))
+                userRef.update("groups", FieldValue.arrayRemove(userRef))
+                btnJoinGroup.text = "Join Group"
+            }
         }
     }
 
@@ -81,7 +102,7 @@ class GroupDetailsActivity : AppCompatActivity() {
 
     private fun setJoinGroupButtonText() {
         val members = groupDoc.get("members") as ArrayList<*>
-        if (userUid in members) {
+        if (userRef in members) {
             btnJoinGroup.text = "Leave Group"
         } else {
             btnJoinGroup.text = "Join Group"
