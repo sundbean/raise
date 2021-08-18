@@ -13,6 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Raise">
+        <activity android:name=".ui.SearchResultsActivity"></activity>
         <activity android:name=".ui.GroupDetailsActivity" />
         <activity android:name=".ui.EventDetailsActivity" />
         <activity android:name=".ui.EventConfirmationActivity" />
