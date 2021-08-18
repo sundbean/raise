@@ -42,17 +42,8 @@ class GroupDetailsActivity : AppCompatActivity() {
         userUid = FirebaseAuth.getInstance().currentUser?.uid
         userRef = userUid?.let { db.collection("users").document(it) }!!
 
-        // retrieveGroupData() -> fillViewsWithDataFromFirestore(), setClickListeners()
-        retrieveGroupData()
-        initRecyclerView()
-    }
 
-    private fun retrieveGroupData() {
-        /**
-         * Gets group document from firestore, then executes sub-methods to use the group's data to fill layout's views.
-         * These sub-methods are nested in this method because they depend on initialization of the lateinit variables [groupDoc]
-         * and [groupRef]
-         */
+        // retrieveGroupData() -> fillViewsWithDataFromFirestore(), setClickListeners()
         groupRef = db.collection("groups").document(groupId)
         groupRef.get()
             .addOnSuccessListener { document ->
@@ -60,8 +51,25 @@ class GroupDetailsActivity : AppCompatActivity() {
                 // sub-methods
                 fillViewsWithDataFromFirestore()
                 setClickListeners()
+                initRecyclerView()
             }
     }
+
+//    private fun retrieveGroupData() {
+//        /**
+//         * Gets group document from firestore, then executes sub-methods to use the group's data to fill layout's views.
+//         * These sub-methods are nested in this method because they depend on initialization of the lateinit variables [groupDoc]
+//         * and [groupRef]
+//         */
+//        groupRef = db.collection("groups").document(groupId)
+//        groupRef.get()
+//            .addOnSuccessListener { document ->
+//                groupDoc = document
+//                // sub-methods
+//                fillViewsWithDataFromFirestore()
+//                setClickListeners()
+//            }
+//    }
 
     private fun setClickListeners() {
         /**
@@ -84,7 +92,7 @@ class GroupDetailsActivity : AppCompatActivity() {
                 btnJoinGroup.text = "Leave Group"
             } else {
                 groupRef.update("members", FieldValue.arrayRemove(userRef))
-                userRef.update("groups", FieldValue.arrayRemove(userRef))
+                userRef.update("groups", FieldValue.arrayRemove(groupRef))
                 btnJoinGroup.text = "Join Group"
             }
         }
@@ -113,7 +121,7 @@ class GroupDetailsActivity : AppCompatActivity() {
     }
 
     private fun displayNumberOfMembers() {
-        val numMembers = groupDoc.get("membersNum")
+        val numMembers = groupDoc.get("memberNum")
         tvNumberOfMembers.text = "$numMembers members"
     }
 

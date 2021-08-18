@@ -3,6 +3,7 @@ package com.sundbean.raise.adapters
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +26,7 @@ class EventFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var co
     ): MyViewHolder {
         // I changed this from "parent.context" to "context" and I dont think it broke anything, but just a note for later in case it did...
         val itemView =
-            LayoutInflater.from(context).inflate(R.layout.small_feed_card_layout, parent, false)
+            LayoutInflater.from(context).inflate(R.layout.small_event_card_layout, parent, false)
         return MyViewHolder(itemView)
     }
 
@@ -55,6 +56,7 @@ class EventFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var co
         // make it clickable - this is technically bad practice but I dont understand the better way: https://medium.com/android-gate/recyclerview-item-click-listener-the-right-way-daecc838fbb9
         holder.itemView.setOnClickListener {
             val intent = Intent(context, EventDetailsActivity::class.java)
+            Log.d("EventFeedItemAdapter", "opportunity.id is ${opportunity.id}" )
             intent.putExtra("event_id", opportunity.id)
             context.startActivity(intent)
         }
@@ -67,9 +69,9 @@ class EventFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var co
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        val oppPhoto : ImageView = itemView.findViewById(R.id.ivFeedSmallCardPhoto)
-        val details : TextView = itemView.findViewById(R.id.tvFeedSmallCardDetails)
-        val name : TextView = itemView.findViewById(R.id.tvFeedSmallCardTitle)
+        val oppPhoto : ImageView = itemView.findViewById(R.id.ivEventSmallCardPhoto)
+        val details : TextView = itemView.findViewById(R.id.tvEventSmallCardDetails)
+        val name : TextView = itemView.findViewById(R.id.tvEventSmallCardTitle)
     }
 
 }

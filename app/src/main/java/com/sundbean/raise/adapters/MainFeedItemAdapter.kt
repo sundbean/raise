@@ -25,7 +25,7 @@ class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var con
     ): MyViewHolder {
         // I changed this from "parent.context" to "context" and I dont think it broke anything, but just a note for later in case it did...
         val itemView =
-            LayoutInflater.from(context).inflate(R.layout.feed_card_layout, parent, false)
+            LayoutInflater.from(context).inflate(R.layout.large_event_card_layout, parent, false)
         return MyViewHolder(itemView)
     }
 

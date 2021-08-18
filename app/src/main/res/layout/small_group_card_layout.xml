@@ -2,7 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cvFeedSmallCard"
+    android:id="@+id/cvGroupSmallCard"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
@@ -21,7 +21,7 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/ivFeedSmallCardPhoto"
+            android:id="@+id/ivGroupSmallCardPhoto"
             android:layout_width="200dp"
             android:layout_height="110dp"
             android:adjustViewBounds="false"
@@ -34,7 +34,7 @@
             android:background="@drawable/card_gradient_bottom_to_top" />
 
         <LinearLayout
-            android:id="@+id/llFeedSmallCardText"
+            android:id="@+id/llGroupSmallCardText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"
@@ -43,24 +43,13 @@
             android:paddingBottom="10dp">
 
             <TextView
-                android:id="@+id/tvFeedSmallCardDetails"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:fontFamily="@font/arial_bold"
-                android:paddingStart="7dp"
-                android:text="Date \u2022 Time \u2022 Attendees"
-                android:textColor="@color/white"
-                android:textSize="7dp" />
-
-            <TextView
-                android:id="@+id/tvFeedSmallCardTitle"
+                android:id="@+id/tvGroupSmallCardTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/arial_bold"
                 android:paddingStart="7dp"
                 android:paddingTop="3dp"
-                android:text="Event \u2022 Event Title"
+                android:text="Group Title"
                 android:textColor="@color/white"
                 android:textSize="10dp"
                 android:textStyle="bold" />
