@@ -24,7 +24,6 @@ class GroupDetailsActivity : AppCompatActivity() {
     private lateinit var eventsRecyclerView : RecyclerView
     private lateinit var groupDoc : DocumentSnapshot
     private lateinit var groupRef : DocumentReference
-    private lateinit var feedItemAdapter : EventFeedItemAdapter
     private lateinit var db: FirebaseFirestore
     private var userUid : String? = null
     private lateinit var userRef : DocumentReference
@@ -43,10 +42,9 @@ class GroupDetailsActivity : AppCompatActivity() {
         userUid = FirebaseAuth.getInstance().currentUser?.uid
         userRef = userUid?.let { db.collection("users").document(it) }!!
 
+        // retrieveGroupData() -> fillViewsWithDataFromFirestore(), setClickListeners()
         retrieveGroupData()
         initRecyclerView()
-
-        eventChangeListener()
     }
 
     private fun retrieveGroupData() {
@@ -137,36 +135,22 @@ class GroupDetailsActivity : AppCompatActivity() {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         eventsRecyclerView.layoutManager = horizontalLayoutManager
 
-        feedItemAdapter = EventFeedItemAdapter(eventsArrayList, this)
+        val eventsItemAdapter = EventFeedItemAdapter(eventsArrayList, this)
+        eventsRecyclerView.adapter = eventsItemAdapter
 
-        eventsRecyclerView.adapter = feedItemAdapter
-
-    }
-
-    private fun eventChangeListener() {
-        db = FirebaseFirestore.getInstance()
-        //TODO: narrow this down to only events that belong to the group - right now its just all events
-        db.collection("events")
-            .addSnapshotListener(object: com.google.firebase.firestore.EventListener<QuerySnapshot> {
-                override fun onEvent(
-                    value: QuerySnapshot?,
-                    error: FirebaseFirestoreException?
-                ) {
-                    if (error != null) {
-                        Log.e(TAG, error.message.toString())
-                        return
+        val groupEvents = groupDoc.get("events") as ArrayList<DocumentReference>
+        for (groupEvent in groupEvents) {
+            groupEvent.get()
+                .addOnSuccessListener { doc ->
+                    Log.d(TAG, "Successfully retrieved document: ${doc.id} named ${doc.getString("name")}")
+                    val event = doc.toObject(Opportunity::class.java)
+                    event?.setuid(event.id)
+                    if (event != null) {
+                        eventsArrayList.add(event)
                     }
-                    // loop through all the documents
-                    for (dc : DocumentChange in value?.documentChanges!!) {
-                        if (dc.type == DocumentChange.Type.ADDED){
-                            var event = dc.document.toObject(Opportunity::class.java)
-                            event.setuid(dc.document.id)
-                            Log.d(TAG, "opportunity object is : $event")
-                            eventsArrayList.add(event)
-                        }
-                    }
-                    feedItemAdapter.notifyDataSetChanged()
+                    eventsItemAdapter.notifyDataSetChanged()
                 }
-            })
+        }
+
     }
 }
