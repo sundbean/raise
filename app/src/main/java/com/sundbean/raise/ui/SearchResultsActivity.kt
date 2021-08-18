@@ -36,6 +36,7 @@ class SearchResultsActivity : AppCompatActivity() {
         resultsRecyclerView.layoutManager = LinearLayoutManager(this)
         resultsRecyclerView.setHasFixedSize(true)
 
+        //TODO: Use this search query to query firestore for list of opportunities that will get displayed in recyclerview
         var searchQuery = intent.getStringExtra("search_query")
 
         opportunityArrayList = arrayListOf()
@@ -93,7 +94,7 @@ class SearchResultsActivity : AppCompatActivity() {
             var location = userDoc.get("location") as Map<String, *>
             var city = location.get("locality") as String
 
-            tvSearchResultsHeadline.text = "Results in $city"
+            tvSearchResultsHeadline.text = "$numResults Results in $city"
         }
     }
 }
