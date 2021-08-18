@@ -1,29 +1,24 @@
-package com.sundbean.raise
+package com.sundbean.raise.ui
 
 import android.app.Activity
 import android.content.Intent
-import android.content.res.Resources
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
-import android.view.View
 import android.widget.*
 import androidx.cardview.widget.CardView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.sundbean.raise.R
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.activity_create_event.*
@@ -180,9 +175,6 @@ class RegisterAccountActivity : AppCompatActivity() {
                                 val intent = Intent(this@RegisterAccountActivity, RegistrationSetLocationActivity::class.java)
                                 //get rid of any Login or Register Activities running in the background
                                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                intent.putExtra("user_id", firebaseUser.uid)
-                                intent.putExtra("email_id", email)
-                                // start next activity with the intent that includes user_id and email_id
                                 startActivity(intent)
                                 finish()
                             } else {

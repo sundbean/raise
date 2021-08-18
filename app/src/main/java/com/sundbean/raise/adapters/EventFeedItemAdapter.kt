@@ -1,4 +1,4 @@
-package com.sundbean.raise
+package com.sundbean.raise.adapters
 
 import android.content.Context
 import android.content.Intent
@@ -9,20 +9,23 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.sundbean.raise.Opportunity
+import com.sundbean.raise.R
+import com.sundbean.raise.ui.EventDetailsActivity
 import java.time.LocalTime
 
-class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var context : Context) :
-    RecyclerView.Adapter<MainFeedItemAdapter.MyViewHolder>() {
+class EventFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var context : Context) :
+    RecyclerView.Adapter<EventFeedItemAdapter.MyViewHolder>() {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
     ): MyViewHolder {
         // I changed this from "parent.context" to "context" and I dont think it broke anything, but just a note for later in case it did...
-        val itemView = LayoutInflater.from(context).inflate(R.layout.feed_card_layout, parent, false)
+        val itemView =
+            LayoutInflater.from(context).inflate(R.layout.small_feed_card_layout, parent, false)
         return MyViewHolder(itemView)
     }
 
@@ -45,13 +48,7 @@ class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var con
 
         holder.details.text = "${opportunity.date}  \u2022  $displayTime$meridian  \u2022  ${opportunity.rsvpNum} Going"
 
-        if (opportunity.oppType == "event") {
-            holder.oppIcon.setImageResource(R.drawable.ic_date)
-            holder.name.text = "Event \u2022 ${opportunity.name}"
-        } else if (opportunity.oppType == "fundraiser") {
-            holder.oppIcon.setImageResource(R.drawable.ic_dollars)
-            holder.name.text = "Fundraiser \u2022 ${opportunity.name}"
-        }
+        holder.name.text = "${opportunity.name}"
 
         Glide.with(context!!).load(opportunity.photoUrl).centerCrop().into(holder.oppPhoto)
 
@@ -70,10 +67,9 @@ class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var con
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        val oppPhoto : ImageView = itemView.findViewById(R.id.ivFeedCardPhoto)
-        val oppIcon : ImageView = itemView.findViewById(R.id.ivOpportunityTypeIcon)
-        val details : TextView = itemView.findViewById(R.id.tvFeedCardDetails)
-        val name : TextView = itemView.findViewById(R.id.tvFeedCardTitle)
+        val oppPhoto : ImageView = itemView.findViewById(R.id.ivFeedSmallCardPhoto)
+        val details : TextView = itemView.findViewById(R.id.tvFeedSmallCardDetails)
+        val name : TextView = itemView.findViewById(R.id.tvFeedSmallCardTitle)
     }
 
 }

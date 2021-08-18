@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scrollbarTrackVertical="@drawable/background_navy_rectangle"
-        tools:context=".CreateEventActivity">
+        tools:context=".ui.CreateEventActivity">
 
         <TextView
             android:id="@+id/tvCreateEventPageTitle"
@@ -326,13 +326,15 @@
                 android:id="@+id/rvChooseEventCauses"
                 android:layout_width="396dp"
                 android:layout_height="673dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvQuestion2" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnJoinGroup"
+                android:id="@+id/btnCreateEvent"
                 android:layout_width="340dp"
                 android:layout_height="60dp"
                 android:layout_margin="24dp"

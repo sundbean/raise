@@ -1,3 +1,5 @@
+package com.sundbean.raise.ui
+
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,9 +13,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sundbean.raise.*
 import com.sundbean.raise.R
-import kotlinx.android.synthetic.main.activity_event_confirmation.*
-import kotlinx.android.synthetic.main.fragment_main_feed2.*
-import kotlinx.android.synthetic.main.fragment_organize.*
+import com.sundbean.raise.adapters.MainFeedItemAdapter
 import java.util.*
 
 

@@ -1,24 +1,18 @@
-package com.sundbean.raise
+package com.sundbean.raise.ui
 
 import android.content.Intent
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
-import android.util.DisplayMetrics
 import android.util.Log
 import com.bumptech.glide.Glide
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
+import com.sundbean.raise.R
 import kotlinx.android.synthetic.main.activity_create_event.*
 import kotlinx.android.synthetic.main.activity_event_confirmation.*
-import java.net.URL
 import java.util.*
-import kotlin.concurrent.timerTask
 
 class EventConfirmationActivity : AppCompatActivity() {
 

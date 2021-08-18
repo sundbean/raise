@@ -1,6 +1,5 @@
-package com.sundbean.raise
+package com.sundbean.raise.ui
 
-import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +21,8 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.sundbean.raise.R
+import com.sundbean.raise.convertStateNameToAbbreviation
 import kotlinx.android.synthetic.main.activity_event_details.*
 import java.time.LocalDate
 import java.time.LocalTime
@@ -52,7 +53,7 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_event_details)
 
         db = Firebase.firestore
-        displayImageView = findViewById(R.id.ivGroupDetailImage)
+        displayImageView = findViewById(R.id.ivEventDetailImage)
         mapView = findViewById(R.id.mapView)
         userUid = FirebaseAuth.getInstance().currentUser?.uid
         eventId = intent.getStringExtra("event_id") as String
@@ -101,19 +102,19 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun setClickListeners() {
         ibBackButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
+//            val intent = Intent(this, MainActivity::class.java)
+//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//            startActivity(intent)
             finish()
         }
 
-        btnJoinGroup.setOnClickListener {
-            if (btnJoinGroup.text == "RSVP") {
+        btnRSVP.setOnClickListener {
+            if (btnRSVP.text == "RSVP") {
                 eventRef.update("attendees", FieldValue.arrayUnion(userUid))
-                btnJoinGroup.text = "cancel RSVP"
+                btnRSVP.text = "cancel RSVP"
             } else {
                 eventRef.update("attendees", FieldValue.arrayRemove(userUid))
-                btnJoinGroup.text = "RSVP"
+                btnRSVP.text = "RSVP"
             }
         }
 
@@ -188,9 +189,9 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun setRSVPButtonText() {
         val attendees = eventDoc.get("attendees") as ArrayList<*>
         if (userUid in attendees) {
-            btnJoinGroup.text = "cancel RSVP"
+            btnRSVP.text = "cancel RSVP"
         } else {
-            btnJoinGroup.text = "RSVP"
+            btnRSVP.text = "RSVP"
         }
     }
 
@@ -215,11 +216,11 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun displayNumberOfAttendees() {
         val numAttendees = eventDoc.get("rsvpNum")
-        tvNumberOfMembers.text = "$numAttendees going"
+        tvNumberOfAttendees.text = "$numAttendees going"
     }
 
     private fun displayEventTitle() {
-        tvGroupDetailTitle.text = eventDoc.getString("name")
+        tvEventDetailTitle.text = eventDoc.getString("name")
     }
 
     private fun displayImage() {

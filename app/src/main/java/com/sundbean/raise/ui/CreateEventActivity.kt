@@ -1,4 +1,4 @@
-package com.sundbean.raise
+package com.sundbean.raise.ui
 
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.location.Geocoder
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
@@ -17,6 +16,7 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -27,16 +27,19 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.sundbean.raise.BuildConfig.MAPS_API_KEY
+import com.sundbean.raise.R
+import com.sundbean.raise.adapters.CausesItemAdapter
+import com.sundbean.raise.models.Cause
+import com.sundbean.raise.models.OnSelectedCauseClickListener
+import com.sundbean.raise.models.OnUnselectedCauseClickListener
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.activity_create_event.*
-import kotlinx.android.synthetic.main.activity_create_event.ivEventPhoto
 import kotlinx.android.synthetic.main.activity_event_details.*
 import java.time.LocalDate
 import java.time.LocalTime
@@ -44,10 +47,10 @@ import java.util.*
 
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
-    private lateinit var causesRecyclerView : RecyclerView
     private lateinit var autocompleteFragment : AutocompleteSupportFragment
     private var selectedPlaceId: String? = null
     private lateinit var selectedPlaceCoordinates: LatLng
+    private lateinit var selectedCauses: MutableList<String>
     private var eventType : String? = null
     private lateinit var etEventName : EditText
     private lateinit var tvDate : TextView
@@ -81,7 +84,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         setContentView(R.layout.activity_create_event)
 
         rgOrganizer = findViewById(R.id.rgOrganizer)
-        btnCreateEvent = findViewById(R.id.btnJoinGroup)
+        btnCreateEvent = findViewById(R.id.btnCreateEvent)
         etEventName = findViewById(R.id.etEventName)
         tvDate = findViewById(R.id.tvDate)
         flDate = findViewById(R.id.flEventDate)
@@ -96,104 +99,18 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         rgOrganizer = findViewById(R.id.rgOrganizer)
         tvAutocompleteHint = findViewById(R.id.tvAutocompleteHint)
         url = ""
+        selectedCauses = mutableListOf()
 
-        // when the event photo container is clicked, the user wants to pick a photo
-        rlUploadImage.setOnClickListener {
-            pickImageFromGallery()
-        }
+        initPhotoSelection()
+        initEventTypeSpinner()
+        initDateAndTimeSelection()
+        initAutoCompleteFragment()
+        initCausesRecyclerView()
+        setCreateEventClickListener()
 
-        // Handling event type input
-        val eventTypeSpinner : Spinner = findViewById(R.id.spinnerEventType)
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter.createFromResource(
-            this,
-            R.array.event_type_array,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            // Specify layout to use when the list of choices appears
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
-            eventTypeSpinner.adapter = adapter
-        }
+    }
 
-
-        tvDate.setOnClickListener {
-            pickDate()
-        }
-
-        tvStartTime.setOnClickListener {
-            pickTime("start")
-        }
-
-        tvEndTime.setOnClickListener {
-            pickTime("end")
-        }
-
-        // Make the causes recycler view
-        causesRecyclerView = findViewById(R.id.rvChooseEventCauses)
-        val causes = mutableListOf("img_animal_rights_foreground", "img_arts_and_culture_foreground", "img_black_lives_matter_foreground", "img_climate_change_foreground", "img_conservation_foreground", "img_education_foreground", "img_food_access_foreground", "img_homelessness_poverty_foreground", "img_lgbt_rights_foreground", "img_mental_health_foreground", "img_political_reform_foreground", "img_prison_reform_foreground", "img_refugee_rights_foreground", "img_water_sanitation_foreground", "img_womens_rights_foreground")
-        GridLayoutManager(
-            this.baseContext,
-            3,
-            RecyclerView.VERTICAL,
-            false
-        ).apply {
-            causesRecyclerView.layoutManager = this
-        }
-
-        causesRecyclerView.adapter = RecyclerViewAdapter(this, causes)
-
-        // fixes uneven scrolling issue
-        causesRecyclerView.setNestedScrollingEnabled(false)
-
-        eventTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-                // retrieve the selected item with parent.getItemAtPosition(pos)
-                eventType = parent.getItemAtPosition(pos) as String
-                Log.i("CreateEventActivity", "selected item: $eventType")
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                // Another interface callback
-            }
-        }
-
-        // Initialize the AutocompleteSupportFragment (for user location)
-        autocompleteFragment =
-            supportFragmentManager.findFragmentById(R.id.afCreateEvent)
-                    as AutocompleteSupportFragment
-
-        // Style the autocomplete fragment view
-        var fView : View? = autocompleteFragment.view
-        var etTextInput : EditText = fView!!.findViewById(R.id.places_autocomplete_search_input)
-        etTextInput.setTextSize(16.0f)
-
-        // make the autocomplete icon line up with the other icons
-        autocompleteFragment.view?.setPadding(-40, 0, 0, 0)
-
-        // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.ADDRESS_COMPONENTS))
-
-        // Set up a PlaceSelectionListener to handle the response.
-        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onPlaceSelected(place: Place) {
-                // TODO: Get info about the selected place.
-                // using the place id: https://developers.google.com/maps/documentation/places/web-service/place-id
-                selectedPlaceId = place.id
-                selectedPlaceCoordinates = place.latLng!!
-                tvAutocompleteHint.setVisibility(View.GONE)
-            }
-
-            override fun onError(status: Status) {
-                // TODO: Handle the error.
-                Log.i("Location Activity", "An error occurred: $status")
-            }
-        })
-
-        //TODO: find a way to hide this api key!
-        Places.initialize(applicationContext, MAPS_API_KEY)
-        val placesClient = Places.createClient(this)
-
+    private fun setCreateEventClickListener() {
         btnCreateEvent.setOnClickListener {
             val selectedOption: Int = rgOrganizer!!.checkedRadioButtonId
             if (selectedOption == null) {
@@ -213,7 +130,176 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                 performEventCreation()
             }
         }
+    }
 
+    private fun initAutoCompleteFragment() {
+        // Initialize the AutocompleteSupportFragment (for user location)
+        autocompleteFragment =
+            supportFragmentManager.findFragmentById(R.id.afCreateEvent)
+                    as AutocompleteSupportFragment
+
+        // Style the autocomplete fragment view
+        var fView : View? = autocompleteFragment.view
+        var etTextInput : EditText = fView!!.findViewById(R.id.places_autocomplete_search_input)
+        etTextInput.setTextSize(16.0f)
+
+        // make the autocomplete icon line up with the other icons
+        autocompleteFragment.view?.setPadding(-40, 0, 0, 0)
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.ADDRESS_COMPONENTS))
+
+        handlePlaceSelection()
+    }
+
+    private fun handlePlaceSelection() {
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                // TODO: Get info about the selected place.
+                // using the place id: https://developers.google.com/maps/documentation/places/web-service/place-id
+                selectedPlaceId = place.id
+                selectedPlaceCoordinates = place.latLng!!
+                tvAutocompleteHint.setVisibility(View.GONE)
+            }
+
+            override fun onError(status: Status) {
+                // TODO: Handle the error.
+                Log.i("Location Activity", "An error occurred: $status")
+            }
+        })
+
+        //TODO: find a way to hide this api key!
+        Places.initialize(applicationContext, MAPS_API_KEY)
+        val placesClient = Places.createClient(this)
+    }
+
+    private fun initPhotoSelection() {
+        // when the event photo container is clicked, the user wants to pick a photo
+        rlUploadImage.setOnClickListener {
+            pickImageFromGallery()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun initDateAndTimeSelection() {
+        tvDate.setOnClickListener {
+            pickDate()
+        }
+
+        tvStartTime.setOnClickListener {
+            pickTime("start")
+        }
+
+        tvEndTime.setOnClickListener {
+            pickTime("end")
+        }
+    }
+
+    private fun initEventTypeSpinner() {
+        var eventTypeSpinner : Spinner = findViewById(R.id.spinnerEventType)
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.event_type_array,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            eventTypeSpinner.adapter = adapter
+        }
+
+        setEventSelectionListener(eventTypeSpinner)
+    }
+
+    private fun setEventSelectionListener(eventTypeSpinner: Spinner) {
+        eventTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+                // retrieve the selected item with parent.getItemAtPosition(pos)
+                eventType = parent.getItemAtPosition(pos) as String
+                Log.i("CreateEventActivity", "selected item: $eventType")
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // Another interface callback
+            }
+        }
+    }
+
+    private fun initCausesRecyclerView() {
+        /**
+         * Initializes the causes recycler view in a Grid layout. The click listeners passed to the recyclerview adapter
+         * handle user selection of a cause card and user de-selection of a cause card, respectively. They are passed into
+         * recyclerview in this way so that clicks can manipulate the [selectedCauses] array, which is initialized and handled
+         * here in the activity.
+         */
+
+        val causesRecyclerView : RecyclerView = findViewById(R.id.rvChooseEventCauses)
+        val causesArrayList : ArrayList<Cause> = arrayListOf()
+
+        val causesItemAdapter = CausesItemAdapter(this, causesArrayList, object :
+            OnUnselectedCauseClickListener {
+            override fun onItemClick(cause: Cause?) {
+                if (cause != null) {
+                    cause.id?.let { selectedCauses.add(it) }
+                    Log.d(TAG, "cause selected. selectedCauses: $selectedCauses")
+                }
+            }
+        }, object : OnSelectedCauseClickListener {
+            override fun onItemClick(cause: Cause?) {
+                if (cause != null) {
+                    cause.id?.let { selectedCauses.remove(it) }
+                    Log.d(TAG, "cause unselected. selectedCauses: $selectedCauses")
+                }
+            }
+        })
+
+        // sets Recyclerview in a grid layout, 3 cards to a row
+        GridLayoutManager(
+            this.baseContext,
+            3,
+            RecyclerView.VERTICAL,
+            false
+        ).apply {
+            causesRecyclerView.layoutManager = this
+        }
+
+        causesRecyclerView.adapter = causesItemAdapter
+
+        // fixes uneven scrolling issue
+        causesRecyclerView.setNestedScrollingEnabled(false)
+
+        eventChangeListener(causesItemAdapter, causesArrayList)
+    }
+
+    private fun eventChangeListener(causesItemAdapter: CausesItemAdapter, causesArrayList : ArrayList<Cause>) {
+        /**
+         * Gets called at the end of Causes recyclerview initialization. Notifies Recyclerview adapter in order to fill recyclerview
+         * with cards that each correspond to a cause, for user selection.
+         */
+        val db = FirebaseFirestore.getInstance()
+        db.collection("causes")
+            .addSnapshotListener(object: com.google.firebase.firestore.EventListener<QuerySnapshot> {
+                override fun onEvent(
+                    value: QuerySnapshot?,
+                    error: FirebaseFirestoreException?
+                ) {
+                    if (error != null) {
+                        Log.e("Firestore Error", error.message.toString())
+                        return
+                    }
+                    // loop through all the documents
+                    for (dc : DocumentChange in value?.documentChanges!!) {
+                        if (dc.type == DocumentChange.Type.ADDED){
+                            var cause = dc.document.toObject(Cause::class.java)
+                            cause.setUid(dc.document.id)
+                            Log.d("Firestore debug", "cause object is : $cause")
+                            causesArrayList.add(cause)
+                        }
+                    }
+                    causesItemAdapter.notifyDataSetChanged()
+                }
+            })
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -420,6 +506,8 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     "rsvpNum" to 1
                 )
                 Log.i(TAG, "User reference is: $userRef and uid is ${FirebaseAuth.getInstance().uid}")
+
+
                 db.collection("events").add(data)
                     .addOnSuccessListener { documentReference ->
                         Log.d("CreateEventActivity", "Document added to firestore: $documentReference")

@@ -1,10 +1,9 @@
+package com.sundbean.raise.ui
+
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
-import com.sundbean.raise.EventConfirmationActivity
-import com.sundbean.raise.EventDetailsActivity
-import com.sundbean.raise.GroupDetailsActivity
 import com.sundbean.raise.R
 import kotlinx.android.synthetic.main.fragment_explore.*
 
@@ -23,6 +22,7 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
 
         btnGoToGroupDetails.setOnClickListener {
             val intent = Intent(activity, GroupDetailsActivity::class.java)
+            intent.putExtra("group_id", "6sK3bmWEbs64A1KOCrKq")
             startActivity(intent)
         }
 

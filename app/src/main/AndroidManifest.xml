@@ -13,28 +13,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Raise">
-        <activity android:name=".GroupDetailsActivity"></activity>
-        <activity android:name=".PracticeActivity" />
-        <activity android:name=".EventDetailsActivity" />
-        <activity android:name=".EventConfirmationActivity" />
+        <activity android:name=".ui.GroupDetailsActivity" />
+        <activity android:name=".ui.EventDetailsActivity" />
+        <activity android:name=".ui.EventConfirmationActivity" />
         <activity
-            android:name=".RegistrationSetLocationActivity"
+            android:name=".ui.RegistrationSetLocationActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".RegisterAccountActivity"
+            android:name=".ui.RegisterAccountActivity"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".ChooseCausesActivity" />
+        <activity android:name=".ui.ChooseCausesActivity" />
         <activity
-            android:name=".CreateGroupActivity"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".CreateFundraiserActivity"
+            android:name=".ui.CreateGroupActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".CreateEventActivity"
+            android:name=".ui.CreateFundraiserActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.CreateEventActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".ui.LoginActivity"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,8 +41,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".SettingsActivity" />
+        <activity android:name=".ui.MainActivity" />
+        <activity android:name=".ui.SettingsActivity" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
