@@ -10,7 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.QuerySnapshot
 import com.sundbean.raise.R
-import com.sundbean.raise.adapters.CausesItemAdapter
+import com.sundbean.raise.adapters.CausesGridItemAdapter
 import com.sundbean.raise.models.Cause
 import com.sundbean.raise.models.OnSelectedCauseClickListener
 import com.sundbean.raise.models.OnUnselectedCauseClickListener
@@ -41,7 +41,7 @@ class CreateFundraiserActivity : AppCompatActivity() {
          */
         var causesArrayList : ArrayList<Cause> = arrayListOf()
 
-        val causesItemAdapter = CausesItemAdapter(this, causesArrayList, object :
+        val causesItemAdapter = CausesGridItemAdapter(this, causesArrayList, object :
             OnUnselectedCauseClickListener {
             override fun onItemClick(cause: Cause?) {
                 if (cause != null) {
@@ -76,7 +76,7 @@ class CreateFundraiserActivity : AppCompatActivity() {
         eventChangeListener(causesItemAdapter, causesArrayList)
     }
 
-    private fun eventChangeListener(causesItemAdapter: CausesItemAdapter, causesArrayList: ArrayList<Cause>) {
+    private fun eventChangeListener(causesGridItemAdapter: CausesGridItemAdapter, causesArrayList: ArrayList<Cause>) {
         /**
          * Gets called at the end of Causes recyclerview initialization. Notifies Recyclerview adapter in order to fill recyclerview
          * with cards that each correspond to a cause, for user selection.
@@ -101,7 +101,7 @@ class CreateFundraiserActivity : AppCompatActivity() {
                             causesArrayList.add(cause)
                         }
                     }
-                    causesItemAdapter.notifyDataSetChanged()
+                    causesGridItemAdapter.notifyDataSetChanged()
                 }
             })
     }

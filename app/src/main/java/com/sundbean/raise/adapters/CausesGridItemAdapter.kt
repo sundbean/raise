@@ -13,7 +13,12 @@ import com.sundbean.raise.models.Cause
 import com.sundbean.raise.models.OnSelectedCauseClickListener
 import com.sundbean.raise.models.OnUnselectedCauseClickListener
 
-class CausesItemAdapter(private val context : Context, private val causesList: MutableList<Cause>, private val notSelectedListener: OnUnselectedCauseClickListener, private val selectedListener: OnSelectedCauseClickListener) : RecyclerView.Adapter<CausesItemAdapter.ColorViewHolder>() {
+/**
+ * This adapter is intended for a causes grid layout recyclerview, where what happens when a card is clicked depends on if it has
+ * already been selected.
+ */
+
+class CausesGridItemAdapter(private val context : Context, private val causesList: MutableList<Cause>, private val notSelectedListener: OnUnselectedCauseClickListener, private val selectedListener: OnSelectedCauseClickListener) : RecyclerView.Adapter<CausesGridItemAdapter.ColorViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorViewHolder {
         // inflate the custom view from xml layout file
@@ -25,14 +30,10 @@ class CausesItemAdapter(private val context : Context, private val causesList: M
     }
 
     override fun onBindViewHolder(holder: ColorViewHolder, position: Int) {
-        // display current cause
-//        val imageUri = causes[position]
-//        val imageResource = c.resIdByName(imageUri, "mipmap")
-//        holder.iv.setImageResource(imageResource)
         val cause : Cause = causesList[position]
         Glide.with(context!!).load(cause.photoUrl).into(holder.ivCausePhoto)
 
-//        holder.bind(causesList[position], listener)
+
         holder.itemView.setOnClickListener {
             if (holder.ivCausePhoto.colorFilter == null) {
                 // do this if the photo has no color filter; i.e. has not been selected
@@ -43,7 +44,6 @@ class CausesItemAdapter(private val context : Context, private val causesList: M
                 holder.ivCausePhoto.colorFilter = null
             }
         }
-
     }
 
 

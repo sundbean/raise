@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -94,7 +94,7 @@
         <LinearLayout
             android:id="@+id/llExploreBody"
             android:layout_width="match_parent"
-            android:layout_height="600dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:background="@color/primary_navy"
             android:orientation="vertical"
@@ -119,14 +119,15 @@
                 android:id="@+id/rvRSVPEventsComingUp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp" />
+                android:layout_marginStart="16dp"
+                android:nestedScrollingEnabled="false" />
 
             <TextView
                 android:id="@+id/textView9"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="15dp"
                 android:layout_marginBottom="10dp"
                 android:fontFamily="@font/arial_ce"
                 android:text="Popular Groups Near You"
@@ -139,14 +140,15 @@
                 android:id="@+id/rvPopularGroupsInYourLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp" />
+                android:layout_marginStart="16dp"
+                android:nestedScrollingEnabled="false" />
 
             <TextView
                 android:id="@+id/textView11"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="15dp"
                 android:layout_marginBottom="10dp"
                 android:fontFamily="@font/arial_ce"
                 android:text="Events This Week"
@@ -159,13 +161,15 @@
                 android:id="@+id/rvUpcomingEvents"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp" />
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="16dp"
+                android:nestedScrollingEnabled="false" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/llExploreNewCauses"
             android:layout_width="match_parent"
-            android:layout_height="500dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -196,7 +200,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCausesHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:nestedScrollingEnabled="false" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExploreCauses"
@@ -204,6 +210,7 @@
                 android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
+                android:layout_marginBottom="32dp"
                 android:fontFamily="@font/arial_ce_bold"
                 android:text="View All"
                 android:textSize="13.5dp"

@@ -15,10 +15,15 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sundbean.raise.Opportunity
 import com.sundbean.raise.R
+import com.sundbean.raise.adapters.CausesFeedItemAdapter
+import com.sundbean.raise.adapters.CausesGridItemAdapter
 import com.sundbean.raise.adapters.EventFeedItemAdapter
 import com.sundbean.raise.adapters.GroupFeedItemAdapter
+import com.sundbean.raise.models.Cause
 import com.sundbean.raise.models.Group
 import kotlinx.android.synthetic.main.fragment_explore.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class ExploreFragment:Fragment(R.layout.fragment_explore) {
@@ -28,6 +33,10 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
     private lateinit var yourEventsArrayList: ArrayList<Opportunity>
     private lateinit var popularGroupsRecyclerView: RecyclerView
     private lateinit var popularGroupsArrayList: ArrayList<Group>
+    private lateinit var upcomingEventsRecyclerView: RecyclerView
+    private lateinit var upcomingEventsArrayList: ArrayList<Opportunity>
+    private lateinit var causesRecyclerView: RecyclerView
+    private lateinit var causesArrayList: ArrayList<Cause>
     private var db = Firebase.firestore
     private var currentUserUID = FirebaseAuth.getInstance().uid ?: ""
     private var currentUserRef = db.collection("users").document(currentUserUID)
@@ -43,6 +52,10 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
         yourEventsArrayList = arrayListOf()
         popularGroupsRecyclerView = view.findViewById(R.id.rvPopularGroupsInYourLocation)
         popularGroupsArrayList = arrayListOf()
+        upcomingEventsRecyclerView = view.findViewById(R.id.rvUpcomingEvents)
+        upcomingEventsArrayList = arrayListOf()
+        causesRecyclerView = view.findViewById(R.id.rvCausesHorizontal)
+        causesArrayList = arrayListOf()
         exploreFeedHeadline = view.findViewById(R.id.tvWhatsInYourLocation)
 
         currentUserRef.get().addOnSuccessListener { userDoc ->
@@ -55,8 +68,116 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
 
         initSearch()
         initPopularGroupsRecyclerView()
+        initUpcomingEventsRecyclerView()
+        initCausesRecyclerView()
 
     }
+
+    private fun initCausesRecyclerView() {
+        causesRecyclerView.setHasFixedSize(true)
+
+        val horizontalLayoutManager =
+            LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
+        causesRecyclerView.layoutManager = horizontalLayoutManager
+
+        val causesItemAdapter = CausesFeedItemAdapter(requireActivity(), causesArrayList)
+        causesRecyclerView.adapter = causesItemAdapter
+
+        causesEventChangeListener(causesItemAdapter)
+    }
+
+    private fun causesEventChangeListener(adapter: CausesFeedItemAdapter) {
+        db.collection("causes")
+            .addSnapshotListener(object: com.google.firebase.firestore.EventListener<QuerySnapshot> {
+                override fun onEvent(
+                    value: QuerySnapshot?,
+                    error: FirebaseFirestoreException?
+                ) {
+                    if (error != null) {
+                        Log.e("Firestore Error", error.message.toString())
+                        return
+                    }
+                    // loop through all the documents
+                    for (dc : DocumentChange in value?.documentChanges!!) {
+                        if (dc.type == DocumentChange.Type.ADDED){
+                            val cause = dc.document.toObject(Cause::class.java)
+                            cause.setUid(dc.document.id)
+                            Log.d("Firestore debug", "cause object is : $cause")
+                            causesArrayList.add(cause)
+                        }
+                    }
+                    adapter.notifyDataSetChanged()
+                }
+            })
+    }
+
+
+    private fun initUpcomingEventsRecyclerView() {
+        /**
+         * Initializes recyclerview containing upcoming events in the selected location.
+         */
+        upcomingEventsRecyclerView.setHasFixedSize(true)
+
+//         make it horizontal
+        val horizontalLayoutManager =
+            LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
+        upcomingEventsRecyclerView.layoutManager = horizontalLayoutManager
+
+        val upcomingEventsItemAdapter = EventFeedItemAdapter(upcomingEventsArrayList, requireActivity())
+        upcomingEventsRecyclerView.adapter = upcomingEventsItemAdapter
+
+        upcomingEventsEventChangeListener(upcomingEventsItemAdapter)
+    }
+
+    private fun upcomingEventsEventChangeListener(adapter: EventFeedItemAdapter) {
+        /**
+         * Queries the database for all events that are occurring in the selected city, in the next week. Notifies the adapter
+         * so that it can take the resulting list of events and display them in the recyclerview.
+         */
+        Log.d(TAG, "I'm in upcomingEventsEventChangeListener. Variable [city] is $city")
+        val dateRange = getCurrentDateAndNextWeeksDate()
+        db.collection("events").whereEqualTo("location.locality", city).whereGreaterThanOrEqualTo("date", dateRange[0]).whereLessThanOrEqualTo("date", dateRange[1])
+            .addSnapshotListener(object: com.google.firebase.firestore.EventListener<QuerySnapshot> {
+                override fun onEvent(
+                    value: QuerySnapshot?,
+                    error: FirebaseFirestoreException?
+                ) {
+                    if (error != null) {
+                        Log.e("Firestore Error", error.message.toString())
+                        return
+                    }
+                    // loop through all the documents
+                    for (dc : DocumentChange in value?.documentChanges!!) {
+                        if (dc.type == DocumentChange.Type.ADDED){
+                            val event = dc.document.toObject(Opportunity::class.java)
+                            event.setuid(dc.document.id)
+                            Log.d("Firestore debug", "upcoming event object is : $event")
+                            upcomingEventsArrayList.add(event)
+                        }
+                    }
+                    adapter.notifyDataSetChanged()
+                }
+            })
+    }
+
+    private fun getCurrentDateAndNextWeeksDate(): Array<String> {
+        /**
+         * Gets the current date and calculates the date 7 days from now. Formats the dates into strings with format "year-month-day",
+         * which is how dates are stored in the database. Returns an array containing two values: the first, today's date string, and
+         * the second, next week's (7 days from now) date string. These strings will be used to query the database for all events
+         * that are occurring in the next week.
+         */
+        val currentDate = Date()
+        val calendar = Calendar.getInstance()
+        calendar.time = currentDate
+        calendar.add(Calendar.DAY_OF_YEAR, 7)
+        val nextWeeksDate = calendar.time
+
+        val sdf = SimpleDateFormat("yyyy-MM-dd")
+        return arrayOf(sdf.format(currentDate) as String, sdf.format(nextWeeksDate) as String)
+    }
+
+
 
     private fun initSearch() {
         /**
@@ -80,6 +201,9 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
     }
 
     private fun initYourEventsRecyclerView(userDoc: DocumentSnapshot) {
+        /**
+         * Populates recyclerview with all events that user is attending.
+         */
         yourEventsRecyclerView.setHasFixedSize(true)
 
 //         make it horizontal
@@ -110,8 +234,8 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
 
     private fun initPopularGroupsRecyclerView() {
         /**
-         * Right now, this just puts all groups in the recyclerview for presentation purposes.
-         * Future intention: Query the database for the most popular groups in the user's selected location and display those.
+         * Right now, this lists all groups in the user's location for presentation purposes. When there's more in the database,
+         * will need to find a way to sort the query results by member number.
          */
         popularGroupsRecyclerView.setHasFixedSize(true)
 
@@ -123,10 +247,13 @@ class ExploreFragment:Fragment(R.layout.fragment_explore) {
         val groupsItemAdapter = GroupFeedItemAdapter(popularGroupsArrayList, requireActivity())
         popularGroupsRecyclerView.adapter = groupsItemAdapter
 
-        eventChangeListener(groupsItemAdapter)
+        popularGroupsEventChangeListener(groupsItemAdapter)
     }
 
-    private fun eventChangeListener(groupsItemAdapter: GroupFeedItemAdapter) {
+    private fun popularGroupsEventChangeListener(groupsItemAdapter: GroupFeedItemAdapter) {
+        /**
+         * Queries the database for all groups in the selected city.
+         */
         db.collection("groups").whereEqualTo("city", city)
             .addSnapshotListener(object: com.google.firebase.firestore.EventListener<QuerySnapshot> {
                 override fun onEvent(
