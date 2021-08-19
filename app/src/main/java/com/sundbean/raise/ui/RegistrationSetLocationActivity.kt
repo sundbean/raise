@@ -1,6 +1,5 @@
-package com.sundbean.raise
+package com.sundbean.raise.ui
 
-import android.content.ContentValues.TAG
 import android.content.Intent
 import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
@@ -16,10 +15,10 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sundbean.raise.BuildConfig.MAPS_API_KEY
+import com.sundbean.raise.R
 import java.util.*
 
 class RegistrationSetLocationActivity : AppCompatActivity() {
@@ -34,10 +33,6 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registration_set_location)
-
-        // grab the user id and email id from the intent that sent you over to this page (from create account activity)
-        val userId = intent.getStringExtra("user_id")
-        val emailId = intent.getStringExtra("email_id")
 
         setLocationBtn = findViewById(R.id.btnSetLocation)
         auth = Firebase.auth
@@ -66,13 +61,12 @@ class RegistrationSetLocationActivity : AppCompatActivity() {
             }
         })
 
-        //TODO: find a way to hide this api key!
         Places.initialize(applicationContext, MAPS_API_KEY)
         val placesClient = Places.createClient(this)
 
         setLocationBtn.setOnClickListener {
             storeLocationInFirebase(coordinates)
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, ChooseCausesActivity::class.java)
             startActivity(intent)
         }
     }

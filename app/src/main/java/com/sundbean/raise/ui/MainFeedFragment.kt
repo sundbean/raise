@@ -1,3 +1,5 @@
+package com.sundbean.raise.ui
+
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,9 +13,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sundbean.raise.*
 import com.sundbean.raise.R
-import kotlinx.android.synthetic.main.activity_event_confirmation.*
-import kotlinx.android.synthetic.main.fragment_main_feed2.*
-import kotlinx.android.synthetic.main.fragment_organize.*
+import com.sundbean.raise.adapters.MainFeedItemAdapter
 import java.util.*
 
 
@@ -43,15 +43,6 @@ class MainFeedFragment:Fragment(R.layout.fragment_main_feed2) {
         recyclerView.adapter = feedItemAdapter
 
         eventChangeListener()
-
-        // An approach for dealing with dates:
-        // Grab the year, month, day, hour, and minute from the date picker and time picker and store each in its own variable
-        // Pass these variables to a "time conversion" class (that I need to make), which will:
-        // // - if the functionality exists, create a timestamp directly from these variables
-        // // - as a last resort, simply join them together in a string like "2021-10-12-16-45" and store the string as the "dateAndTime"
-        // // // - if I do this, I can then store the "duration" as another field (value in minutes)
-        // // // - in this format it will be easier to figure out dates in a certain provided time range
-        // // // - then when i need to display hte dates, I can parse out the data from the string (possibly splitting at "-" and putting the values in an array) to display in my desired format
 
 }
 

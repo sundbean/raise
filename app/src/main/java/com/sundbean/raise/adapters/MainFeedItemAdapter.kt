@@ -1,4 +1,4 @@
-package com.sundbean.raise
+package com.sundbean.raise.adapters
 
 import android.content.Context
 import android.content.Intent
@@ -9,9 +9,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.sundbean.raise.Opportunity
+import com.sundbean.raise.R
+import com.sundbean.raise.ui.EventDetailsActivity
 import java.time.LocalTime
 
 class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var context : Context) :
@@ -22,7 +24,8 @@ class MainFeedItemAdapter(private val modelList: ArrayList<Opportunity>, var con
         viewType: Int
     ): MyViewHolder {
         // I changed this from "parent.context" to "context" and I dont think it broke anything, but just a note for later in case it did...
-        val itemView = LayoutInflater.from(context).inflate(R.layout.feed_card_layout, parent, false)
+        val itemView =
+            LayoutInflater.from(context).inflate(R.layout.large_event_card_layout, parent, false)
         return MyViewHolder(itemView)
     }
 

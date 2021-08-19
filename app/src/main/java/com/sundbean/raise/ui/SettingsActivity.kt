@@ -1,4 +1,4 @@
-package com.sundbean.raise
+package com.sundbean.raise.ui
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +8,7 @@ import android.widget.ImageButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.sundbean.raise.R
 
 class SettingsActivity : AppCompatActivity() {
 

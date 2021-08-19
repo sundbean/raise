@@ -15,4 +15,5 @@
     <color name="secondary_cream">#FFFAF2E9</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="saturated_blue">#0000FF</color>
 </resources>
