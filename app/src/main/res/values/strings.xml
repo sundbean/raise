@@ -7,10 +7,9 @@
         <item>Select event type:</item>
         <item>Speaker</item>
         <item>Volunteer</item>
-        <item>Workshop/Seminar</item>
+        <item>Informational</item>
         <item>Ceremony</item>
-        <item>Rally</item>
-        <item>Protest</item>
+        <item>Fundraiser</item>
     </string-array>
     <!--    <string name="google_api_key">AIzaSyB_A0RKs7JmFRfMvokjaUYPnDvciHNyheU</string>-->
 </resources>

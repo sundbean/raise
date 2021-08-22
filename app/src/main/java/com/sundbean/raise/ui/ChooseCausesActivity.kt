@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
@@ -21,6 +23,10 @@ class ChooseCausesActivity : AppCompatActivity() {
 
     private lateinit var causesRecyclerView : RecyclerView
     private lateinit var selectedCauses : MutableList<String>
+    private lateinit var auth : FirebaseAuth
+    private lateinit var currentUser : FirebaseUser
+    private lateinit var db : FirebaseFirestore
+    private lateinit var userRef : DocumentReference
     private var TAG = "ChooseCausesActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +35,10 @@ class ChooseCausesActivity : AppCompatActivity() {
 
         causesRecyclerView = findViewById(R.id.rvChooseInterests)
         selectedCauses = mutableListOf()
+        auth = Firebase.auth
+        currentUser = auth.currentUser!!
+        db = Firebase.firestore
+        userRef = db.collection("users").document(currentUser.uid)
 
         initCausesRecyclerView()
 
@@ -38,15 +48,15 @@ class ChooseCausesActivity : AppCompatActivity() {
 
     }
 
-    private fun addCausesToUserDocInFirestore() {
-        val auth = Firebase.auth
-        val currentUser = auth.currentUser
-        val db = Firebase.firestore
 
-        if (currentUser != null) {
-            for (causeId in selectedCauses)
-            db.collection("users").document(currentUser.uid)
-                .update("causes", FieldValue.arrayUnion(causeId))
+    private fun addCausesToUserDocInFirestore() {
+        /**
+         * Adds causes doc ref to "causes" array in user's fierstore document.
+         */
+        for (causeId in selectedCauses) {
+            val causeRef = db.collection("causes").document(causeId)
+            userRef.update("causes", FieldValue.arrayUnion(causeRef))
+            causeRef.update("users", FieldValue.arrayUnion(userRef))
         }
 
         goToNextActivity()
@@ -54,6 +64,9 @@ class ChooseCausesActivity : AppCompatActivity() {
     }
 
     private fun goToNextActivity() {
+        /**
+         * Navigates to Main Activity, signifying completion of user registration and successful login.
+         */
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }

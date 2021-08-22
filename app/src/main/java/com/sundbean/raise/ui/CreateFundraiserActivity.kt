@@ -25,7 +25,7 @@ class CreateFundraiserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_fundraiser)
 
-        causesRecyclerView = findViewById(R.id.rvChooseGroupCauses)
+        causesRecyclerView = findViewById(R.id.rvChooseFundraiserCauses)
         selectedCauses = mutableListOf()
 
         initCausesRecyclerView()
