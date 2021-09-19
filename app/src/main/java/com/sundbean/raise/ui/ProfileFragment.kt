@@ -14,7 +14,7 @@ class ProfileFragment:Fragment(R.layout.fragment_profile) {
 
         super.onViewCreated(view, savedInstanceState)
 
-        btnSettings.setOnClickListener {
+        ibSettings.setOnClickListener {
             val intent = Intent(activity, SettingsActivity::class.java)
             requireActivity().startActivity(intent)
         }

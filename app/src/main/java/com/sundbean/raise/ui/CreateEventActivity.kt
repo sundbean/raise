@@ -1,8 +1,7 @@
 package com.sundbean.raise.ui
 
-import android.app.Activity
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
+import android.app.*
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
@@ -16,6 +15,7 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -45,8 +45,10 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 
+
 class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
+    private lateinit var db : FirebaseFirestore
     private lateinit var autocompleteFragment : AutocompleteSupportFragment
     private var selectedPlaceId: String? = null
     private lateinit var selectedPlaceCoordinates: LatLng
@@ -69,14 +71,17 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
     private lateinit var rbOrganizer : RadioButton
     private lateinit var btnCreateEvent : Button
     private lateinit var eventOrganizerType : String
-    private lateinit var tvAutocompleteHint : TextView
-    private lateinit var eventOrganizer : String
+    private lateinit var eventOrganizer : DocumentReference
     private lateinit var selectedDate : String
+    private lateinit var userRef : DocumentReference
+    private var groupsArray : MutableList<String>? = null
+    private var selectedGroup : String? = null
     private var selectedPhotoUri: Uri? = null
     private lateinit var url: String
     private val GALLERY_REQUEST_CODE = 1234
     private val TAG = "CreateEventActivity"
     private var cal = Calendar.getInstance()
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,107 +102,108 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
         flEndTime = findViewById(R.id.flEventEndTime)
         etDescription = findViewById(R.id.etDescription)
         rgOrganizer = findViewById(R.id.rgOrganizer)
-        tvAutocompleteHint = findViewById(R.id.tvAutocompleteHint)
         url = ""
         selectedCauses = mutableListOf()
+        db = Firebase.firestore
+        val currentUserUID = FirebaseAuth.getInstance().uid ?: ""
+        userRef = db.collection("users").document(currentUserUID)
+
 
         initPhotoSelection()
         initEventTypeSpinner()
         initDateAndTimeSelection()
         initAutoCompleteFragment()
         initCausesRecyclerView()
+        setGroupOrganizerRadioButtonClickListener()
         setCreateEventClickListener()
 
     }
 
-    private fun setCreateEventClickListener() {
-        btnCreateEvent.setOnClickListener {
-            val selectedOption: Int = rgOrganizer!!.checkedRadioButtonId
-            if (selectedOption == null) {
-                Toast.makeText(this@CreateEventActivity, "Please select an event type.", Toast.LENGTH_SHORT).show()
-            } else {
-                rbOrganizer = findViewById(selectedOption)
-                Log.d("CreateEventActivity", "Selected option is: ${rbOrganizer.text}")
-                if (rbOrganizer.text == "I am") {
-                    eventOrganizerType = "user"
-                    eventOrganizer = FirebaseAuth.getInstance().uid ?: ""
-                } else if (rbOrganizer.text == "A group I run") {
-                    eventOrganizerType = "group"
-                    eventOrganizer = "SELECTED_GROUP"
-                }
 
-                Log.d("CreateEventActivity", "I've made it to the performEventCreation() function")
-                performEventCreation()
-            }
-        }
-    }
-
-    private fun initAutoCompleteFragment() {
-        // Initialize the AutocompleteSupportFragment (for user location)
-        autocompleteFragment =
-            supportFragmentManager.findFragmentById(R.id.afCreateEvent)
-                    as AutocompleteSupportFragment
-
-        // Style the autocomplete fragment view
-        var fView : View? = autocompleteFragment.view
-        var etTextInput : EditText = fView!!.findViewById(R.id.places_autocomplete_search_input)
-        etTextInput.setTextSize(16.0f)
-
-        // make the autocomplete icon line up with the other icons
-        autocompleteFragment.view?.setPadding(-40, 0, 0, 0)
-
-        // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.ADDRESS_COMPONENTS))
-
-        handlePlaceSelection()
-    }
-
-    private fun handlePlaceSelection() {
-        // Set up a PlaceSelectionListener to handle the response.
-        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onPlaceSelected(place: Place) {
-                // TODO: Get info about the selected place.
-                // using the place id: https://developers.google.com/maps/documentation/places/web-service/place-id
-                selectedPlaceId = place.id
-                selectedPlaceCoordinates = place.latLng!!
-                tvAutocompleteHint.setVisibility(View.GONE)
-            }
-
-            override fun onError(status: Status) {
-                // TODO: Handle the error.
-                Log.i("Location Activity", "An error occurred: $status")
-            }
-        })
-
-        //TODO: find a way to hide this api key!
-        Places.initialize(applicationContext, MAPS_API_KEY)
-        val placesClient = Places.createClient(this)
-    }
+    ////////////////////////////////////////////////// IMAGE PICKER ////////////////////////////////////////////
 
     private fun initPhotoSelection() {
-        // when the event photo container is clicked, the user wants to pick a photo
+        /**
+         * When the event photo container is clicked, the user wants to pick a photo
+         */
         rlUploadImage.setOnClickListener {
             pickImageFromGallery()
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun initDateAndTimeSelection() {
-        tvDate.setOnClickListener {
-            pickDate()
-        }
+    private fun pickImageFromGallery() {
+        /**
+         * Initiates image picker
+         */
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        val mimeTypes = arrayOf("image/jpeg", "image/png", "image/jpg")
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        startActivityForResult(intent, GALLERY_REQUEST_CODE)
+    }
 
-        tvStartTime.setOnClickListener {
-            pickTime("start")
-        }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        /**
+         * This gets called as a result of [pickImageFromGallery]
+         */
+        super.onActivityResult(requestCode, resultCode, data)
 
-        tvEndTime.setOnClickListener {
-            pickTime("end")
+        when(requestCode) {
+            GALLERY_REQUEST_CODE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    // retrieve data from intent
+                    data?.data?.let { uri ->
+                        launchImageCrop(uri)
+                    }
+                } else {
+                    Log.e(TAG, "Image selection error: Couldn't select that image from memory")
+                }
+            }
+
+            CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE -> {
+                val result = CropImage.getActivityResult(data)
+                if(resultCode == Activity.RESULT_OK) {
+                    result.uri?.let {
+                        selectedPhotoUri = it
+                        setImage(it)
+                    }
+                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                    Log.e(TAG, "Crop error: ${result.error}")
+                }
+            }
         }
     }
 
+    private fun launchImageCrop(uri: Uri) {
+        /**
+         * Gets called inside [onActivityResult] function.
+         */
+        CropImage.activity(uri)
+            .setGuidelines(CropImageView.Guidelines.ON)
+            .setAspectRatio(1920, 1080)
+            .setCropShape(CropImageView.CropShape.RECTANGLE) // this can be made oval
+            .start(this)
+    }
+
+    private fun setImage(uri: Uri?) {
+        /**
+         * Gets called inside [onActivityResult] function.
+         */
+        // take down the upload icon
+        llUploadPhotoCE.visibility = View.GONE
+        // use glide to set the image
+        Glide.with(this)
+            .load(uri)
+            .override(Resources.getSystem().getDisplayMetrics().widthPixels)
+            .into(ivEventPhoto)
+    }
+
+
+    ////////////////////////////////////////////////// EVENT TYPE SPINNER ////////////////////////////////////////////
+
     private fun initEventTypeSpinner() {
-        var eventTypeSpinner : Spinner = findViewById(R.id.spinnerEventType)
+        val eventTypeSpinner : Spinner = findViewById(R.id.spinnerEventType)
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
             this,
@@ -225,6 +231,113 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             }
         }
     }
+
+
+    ////////////////////////////////////////////////// DATE AND TIME PICKERS ////////////////////////////////////////////
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun initDateAndTimeSelection() {
+        tvDate.setOnClickListener {
+            pickDate()
+        }
+
+        tvStartTime.setOnClickListener {
+            pickTime("start")
+        }
+
+        tvEndTime.setOnClickListener {
+            pickTime("end")
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun pickDate() {
+        /**
+         * This is called from [initDateAndTimeSelection]
+         */
+        cal = Calendar.getInstance()
+        val year = cal.get(Calendar.YEAR)
+        val month = cal.get(Calendar.MONTH)
+        val day = cal.get(Calendar.DAY_OF_MONTH)
+
+        DatePickerDialog(this, { _, year, monthOfYear, dayOfMonth ->
+            val date = LocalDate.of(year, monthOfYear, dayOfMonth)
+            // need to change this to black because its gray when Activity first loads
+            tvDate.setTextColor(resources.getColor(R.color.black))
+            tvDate.text = date.toString()
+            selectedDate = date.toString()
+        }, year, month, day).show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun pickTime(startOrEnd : String) {
+        /**
+         * This is called from [initDateAndTimeSelection]
+         */
+        val mcurrentTime = Calendar.getInstance()
+        val hour = mcurrentTime.get(Calendar.HOUR_OF_DAY)
+        val minute = mcurrentTime.get(Calendar.MINUTE)
+
+        TimePickerDialog(this,
+            { _, hourOfDay, minute ->
+                val time = LocalTime.of(hourOfDay, minute)
+                if (startOrEnd == "start") {
+                    eventStartTime = time
+                    tvStartTime.text = time.toString()
+                    tvStartTime.setTextColor(Color.parseColor("#000000"))
+                } else if (startOrEnd == "end") {
+                    eventEndTime = time
+                    tvEndTime.text = time.toString()
+                    tvEndTime.setTextColor(Color.parseColor("#000000"))
+                }
+            }, hour, minute, false).show()
+    }
+
+
+    ////////////////////////////////////////////////// AUTOCOMPLETE FRAGMENT ////////////////////////////////////////////
+
+    private fun initAutoCompleteFragment() {
+        // Initialize the AutocompleteSupportFragment (for user location)
+        autocompleteFragment =
+            supportFragmentManager.findFragmentById(R.id.afCreateEvent)
+                    as AutocompleteSupportFragment
+
+        // Style the autocomplete fragment view
+        val fView : View? = autocompleteFragment.view
+        val etTextInput : EditText = fView!!.findViewById(R.id.places_autocomplete_search_input)
+        etTextInput.textSize = 16.0f
+
+        // make the autocomplete icon line up with the other icons
+        autocompleteFragment.view?.setPadding(-40, 0, 0, 0)
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.ADDRESS_COMPONENTS))
+
+        handlePlaceSelection()
+    }
+
+    private fun handlePlaceSelection() {
+        /**
+         * This gets called inside [initAutoCompleteFragment]
+         */
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                selectedPlaceId = place.id
+                selectedPlaceCoordinates = place.latLng!!
+            }
+
+            override fun onError(status: Status) {
+                Log.i("Location Activity", "An error occurred: $status")
+            }
+        })
+
+        Places.initialize(applicationContext, MAPS_API_KEY)
+//        val placesClient = Places.createClient(this)
+    }
+
+
+    ////////////////////////////////////////////////// CAUSES RECYCLERVIEW ////////////////////////////////////////////
 
     private fun initCausesRecyclerView() {
         /**
@@ -274,7 +387,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
     private fun eventChangeListener(causesGridItemAdapter: CausesGridItemAdapter, causesArrayList : ArrayList<Cause>) {
         /**
-         * Gets called at the end of Causes recyclerview initialization. Notifies Recyclerview adapter in order to fill recyclerview
+         * Gets called inside [initCausesRecyclerView]. Notifies Recyclerview adapter in order to fill recyclerview
          * with cards that each correspond to a cause, for user selection.
          */
         val db = FirebaseFirestore.getInstance()
@@ -291,7 +404,7 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     // loop through all the documents
                     for (dc : DocumentChange in value?.documentChanges!!) {
                         if (dc.type == DocumentChange.Type.ADDED){
-                            var cause = dc.document.toObject(Cause::class.java)
+                            val cause = dc.document.toObject(Cause::class.java)
                             cause.setUid(dc.document.id)
                             Log.d("Firestore debug", "cause object is : $cause")
                             causesArrayList.add(cause)
@@ -302,136 +415,149 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             })
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun pickTime(startOrEnd : String) {
-        val mcurrentTime = Calendar.getInstance()
-        val hour = mcurrentTime.get(Calendar.HOUR_OF_DAY)
-        val minute = mcurrentTime.get(Calendar.MINUTE)
 
-        TimePickerDialog(this,
-            { view, hourOfDay, minute ->
-                val time = LocalTime.of(hourOfDay, minute)
-                if (startOrEnd == "start") {
-                    eventStartTime = time
-                    tvStartTime.text = time.toString()
-                    tvStartTime.setTextColor(Color.parseColor("#000000"))
-                } else if (startOrEnd == "end") {
-                    eventEndTime = time
-                    tvEndTime.text = time.toString()
-                    tvEndTime.setTextColor(Color.parseColor("#000000"))
-                }
-            }, hour, minute, false).show()
+    ////////////////////////////////////////////////// ORGANIZER SELECTION (GROUP)  ////////////////////////////////////////////
+
+    /**
+     * The code in this section handles the user's selection of "A group I run" as the event's organizer.
+     */
+
+    private fun setGroupOrganizerRadioButtonClickListener() {
+        getThisUsersModeratedGroupsFromFirestore()
+
+        rbGroupOrganizer.setOnClickListener {
+            askUserToSelectGroup()
+        }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun pickDate() {
-        cal = Calendar.getInstance()
-        val year = cal.get(Calendar.YEAR)
-        val month = cal.get(Calendar.MONTH)
-        val day = cal.get(Calendar.DAY_OF_MONTH)
+    private fun getThisUsersModeratedGroupsFromFirestore() {
+        /**
+         * Prepares [groupsArray] for use in "Select Group" dialog, which will show if the user selects "A group I run" as the event's organizer.
+         * This function grabs the authenticated user's document from Firestore, then fetches the array of document references under the field "groups".
+         * Then, it fetches the group document for each group document reference, and adds the group's name to the [groupsArray] mutable list. This function
+         * will get called whether or not the user selects 'A group I run', because it takes a second or two to fetch all the data from firestore, and it has
+         * to be ready by the time the user selects 'A group I run' in order for that function to work.
+         */
+        groupsArray = mutableListOf()
+        val userId = FirebaseAuth.getInstance().uid!!
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { doc ->
+                Log.d(TAG, "User doc retrieved in createGroupsArrayList()")
+                val groupsModerated = doc.get("groupsModerated") as ArrayList<DocumentReference>
+                Log.d(TAG, "groupsModerated: $groupsModerated")
+                for (group in groupsModerated) {
+                    group.get()
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Group doc retrieved in createGroupsArrayList(): ${it.getString("name")}")
+                            // add the name of the group to the groupNames array list
+                            val groupName = it.getString("name")
+                            if (groupName != null) {
+                                groupsArray?.add(groupName)
+                            }
+                            Log.d(TAG, "groupsArray: $groupsArray")
+                        }
 
-        DatePickerDialog(this, { view, year, monthOfYear, dayOfMonth ->
-            val date = LocalDate.of(year, monthOfYear, dayOfMonth)
-            // need to change this to black because its gray when Activity first loads
-            tvDate!!.setTextColor(resources.getColor(R.color.black))
-            tvDate!!.text = date.toString()
-            selectedDate = date.toString()
-        }, year, month, day).show()
-    }
-
-
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        when(requestCode) {
-            GALLERY_REQUEST_CODE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    // retrieve data from intent
-                    data?.data?.let { uri ->
-                        launchImageCrop(uri)
-                    }
-                } else {
-                    Log.e(TAG, "Image selection error: Couldn't select that image from memory")
                 }
             }
+    }
 
-            CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE -> {
-                val result = CropImage.getActivityResult(data)
-                if(resultCode == Activity.RESULT_OK) {
-                    result.uri?.let {
-                        selectedPhotoUri = it
-                        setImage(it)
+    private fun askUserToSelectGroup() {
+        /**
+         * Initiates and then shows a dialog containing radio buttons that correspond to each group that the user moderates.
+         */
+        // setup the alert builder
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Choose a group:")
+
+        // add a radio button list
+        val groups : Array<String>? = groupsArray?.toTypedArray()
+        val checkedItem = 1
+
+        builder.setSingleChoiceItems(groups, checkedItem,
+            DialogInterface.OnClickListener { dialog, which ->
+                selectedGroup = groups?.get(which)
+            })
+
+        // add OK and Cancel buttons
+        builder.setPositiveButton("OK") { dialog, which ->
+            // user clicked OK
+        }
+        builder.setNegativeButton("Cancel", null)
+
+        // create and show the alert dialog
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+
+    ////////////////////////////////////////////////// CREATE THE EVENT  ////////////////////////////////////////////
+
+    /**
+     * All the code in this section handles event creation. When the user clicks the "Create Event" button, this sets off a cascade of function calls
+     * that (1) process the user-entered data in the Create Event form (i.e. prepare it for the database) and (2) save the processed data to Firestore.
+     * ------------------------------------------------------------------------------------------------------------------------------------------------
+     * 1. [setCreateEventClickListener] sets the click listener on the "Create Event" button.
+     * 2. Immediately upon click, [eventOrganizerType] and [eventOrganizer] are determined from the selected radio button.
+     * 3. Then, [setCreateEventClickListener] calls [performEventCreation].
+     * 4. [performEventCreation] first makes sure that all the required parts of the form have been filled out by the user.
+     * 5. Then, [performEventCreation] calls [saveEventToFirestore].
+     * 6. [saveEventToFirestore] gets the user-inputted data and uses it to create a hash map, which mirrors what this event's Firestore document will look
+     *    like. Some of the values of this hash map ([eventType], [selectedDate], [eventStartTime], [eventEndTime], [eventOrganizerType], [eventOrganizer],
+     *    and [userRef]) have already been processed by the time we get here. This function will call [getLocationDataFromCoordinates] and [getCausesRefs]
+     *    in order to process the event's location and selected causes.
+     * 7. Then, [saveEventToFirestore] calls [updateDatabaseWithEvent] and passes the [data] hashmap it just created, as well as the [causesRefs] it just retrieved.
+     * 8. [updateDatabaseWithEvent] adds the [data] hashmap (in the form of a document) to the "events" collection in Firestore. Upon success, we get the document
+     *    reference (stored in [eventReference]). We pass this document reference to a (a) series of functions that update other parts of Firestore with the new
+     *    event, (b) saves the event's photo to Firebase storage, and (c) start the Event Confirmation activity.
+     *      a. [addEventToUserEvents] adds the event's document reference to the user document's 'events' array in Firestore. [addEventToGroupsEvents] adds the event's
+     *         document reference to the group organizer's 'events' array in Firestore, if applicable. [addEventToApplicableCauses] adds the event's document reference
+     *         to each of the selected causes' 'events' array in Firestore.
+     *      b. [uploadImageToFirebaseStorage] saves the selected image to Firebase storage, then gets the image's download URL. The function then updates the event
+     *         document's "photoUrl" field with this url (when the event was first created, this was left blank).
+     *      c. [startEventDetailsActivityWithEventId] creates a new intent, with the new event's id attached, and starts the Event Details activity to confirm event
+     *         creation.
+     */
+
+    private fun setCreateEventClickListener() {
+        /**
+         * Sets the click listener for the "Create Event" button. If the user clicks this button, this triggers this function to check what
+         * the user has selected has selected as the event's organizer ("Who is organizing this event?"). If it is the user ("I am"), then
+         * [eventOrganizerType] is set to "user" and [eventOrganizer] is set to the user's document reference. If it is one of the user's moderated
+         * groups ("A group I run"), then [eventOrganizerType] is set to "group" and [eventOrganizer] is set to the selected group's document reference.
+         * After these two variables are set to their appropriate values, the [performEventCreation] function is called. This order is necessary, because
+         * [performEventCreation] will insert the values of [eventOrganizerType] and [eventOrganizer] in the event document that is created in
+         * [performEventCreation].
+         */
+        btnCreateEvent.setOnClickListener {
+            val selectedOption: Int = rgOrganizer.checkedRadioButtonId
+            rbOrganizer = findViewById(selectedOption)
+            Log.d("CreateEventActivity", "Selected option is: ${rbOrganizer.text}")
+            if (rbOrganizer.text == "I am") {
+                eventOrganizerType = "user"
+                eventOrganizer = userRef
+                performEventCreation()
+            } else if (rbOrganizer.text == "A group I run") {
+                eventOrganizerType = "group"
+                db.collection("groups").whereEqualTo("name", selectedGroup).get()
+                    .addOnSuccessListener {
+                        it.forEach { doc ->
+                            eventOrganizer = doc.reference
+                            Log.d(TAG, "Setting eventOrganizer variable: $eventOrganizer")
+                            Log.d("CreateEventActivity", "I've made it to the performEventCreation() function")
+                            // this is here to make sure it doesnt run until after the eventOrganizer variable has been assigned
+                            performEventCreation()
+                        }
                     }
-                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                    Log.e(TAG, "Crop error: ${result.error}")
-                }
             }
         }
     }
 
-    private fun setImage(uri: Uri?) {
-        // take down the upload icon
-        llUploadPhotoCE.visibility = View.GONE
-        // use glide to set the image
-        Glide.with(this)
-            .load(uri)
-            .override(Resources.getSystem().getDisplayMetrics().widthPixels)
-            .into(ivEventPhoto)
-    }
-
-    private fun launchImageCrop(uri: Uri) {
-        CropImage.activity(uri)
-            .setGuidelines(CropImageView.Guidelines.ON)
-            .setAspectRatio(1920, 1080)
-            .setCropShape(CropImageView.CropShape.RECTANGLE) // this can be made oval
-            .start(this)
-    }
-
-    private fun pickImageFromGallery() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        intent.type = "image/*"
-        val mimeTypes = arrayOf("image/jpeg", "image/png", "image/jpg")
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        startActivityForResult(intent, GALLERY_REQUEST_CODE)
-    }
-
-    private fun uploadImageToFirebaseStorage(eventRef : DocumentReference) {
-        Log.d(TAG, "I'm inside uploadImageToFirebaseStorage")
-
-        if (selectedPhotoUri == null) {
-            Log.d(TAG, "selectedPhotoUri was null so not uploaded to storage")
-            return
-        }
-
-        val filename = UUID.randomUUID().toString()
-        val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
-
-        ref.putFile(selectedPhotoUri!!)
-            .addOnSuccessListener {
-                Log.d(TAG, "Successfully uploaded image: ${it.metadata?.path}")
-
-                ref.downloadUrl.addOnSuccessListener {
-                    Log.d(TAG, "File location: $it")
-                    // this is here because there was no way to assign it.toString() to a variable that would work
-                    // update photoUrl in event
-                    eventRef.update("photoUrl", it.toString())
-                }
-            }
-            .addOnFailureListener {
-                Log.e(TAG,"There was an error adding image to firebase storage: $it")
-            }
-    }
 
     private fun performEventCreation() {
+        /**
+         * Checks if any data is missing and, if so, prompts the user for the data via a Toast. If all required has been entered,
+         * then the event creation process begins ([saveEventToFirestore])
+         */
         when {
             TextUtils.isEmpty(etEventName.text.toString().trim()) -> {
                 Toast.makeText(
@@ -473,63 +599,55 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
                     this@CreateEventActivity,
                     "Please select an event type.",
                     Toast.LENGTH_SHORT
-                )
+                ).show()
             }
 
             else -> {
-                Log.d("CreateEventActivity", "I've made it into performEventCreation() and am about to save to Firestore")
-                val eventName: String = etEventName.text.toString().trim()
-                val eventDescription: String = etDescription.text.toString().trim()
-
-                var currentUserUID = FirebaseAuth.getInstance().uid ?: ""
-                val uid = currentUserUID as String
-                val db = Firebase.firestore
-                var userRef = db.collection("users").document(uid)
-
-                var locationData = getLocationDataFromCoordinates(selectedPlaceCoordinates)
-
-                // save event to Firestore events collection
-                val data = hashMapOf(
-                    "name" to eventName,
-                    "photoUrl" to "",
-                    "oppType" to "event",
-                    "type" to eventType,
-                    "date" to selectedDate,
-                    "startTime" to eventStartTime,
-                    "endTime" to eventEndTime,
-                    "location" to locationData,
-                    "organizerType" to eventOrganizerType,
-                    "organizer" to eventOrganizer,
-                    "description" to eventDescription,
-                    "createdBy" to FirebaseAuth.getInstance().uid,
-                    "attendees" to listOf(userRef.id),
-                    "rsvpNum" to 1
-                )
-                Log.i(TAG, "User reference is: $userRef and uid is ${FirebaseAuth.getInstance().uid}")
-
-
-                db.collection("events").add(data)
-                    .addOnSuccessListener { documentReference ->
-                        Log.d("CreateEventActivity", "Document added to firestore: $documentReference")
-                        // add the event to the user's events:
-                        userRef.update("events", FieldValue.arrayUnion(documentReference.id))
-                        uploadImageToFirebaseStorage(documentReference)
-                        val intent = Intent(this@CreateEventActivity, EventConfirmationActivity::class.java)
-                        intent.putExtra("event_id", documentReference.id)
-                        startActivity(intent)
-                    }
-                    .addOnFailureListener { e ->
-                        Log.w("CreateEventActivity", "Error adding document", e)
-                    }
-
-
+                saveEventToFirestore()
             }
 
         }
     }
 
+    private fun saveEventToFirestore() {
+        /**
+         * This gets called inside [performEventCreation].
+         */
+        val eventName: String = etEventName.text.toString().trim()
+        val eventDescription: String = etDescription.text.toString().trim()
+
+        val locationData = getLocationDataFromCoordinates(selectedPlaceCoordinates)
+
+        val causesRefs = getCausesRefs()
+
+        val data = hashMapOf(
+            "name" to eventName,
+            "photoUrl" to "",
+            "oppType" to "event",
+            "type" to eventType,
+            "date" to selectedDate,
+            "startTime" to eventStartTime,
+            "endTime" to eventEndTime,
+            "location" to locationData,
+            "organizerType" to eventOrganizerType,
+            "organizer" to eventOrganizer,
+            "description" to eventDescription,
+            "createdBy" to userRef,
+            "attendees" to listOf(userRef),
+            "rsvpNum" to 1,
+            "causes" to causesRefs
+        )
+        Log.i(TAG, "User reference is: $userRef and uid is ${FirebaseAuth.getInstance().uid}")
+
+        updateDatabaseWithEvent(data, causesRefs)
+
+    }
+
     private fun getLocationDataFromCoordinates(coordinates: LatLng): Any? {
-        var geocoder = Geocoder(this@CreateEventActivity, Locale.US)
+        /**
+         * This gets called in [saveEventToFirestore]
+         */
+        val geocoder = Geocoder(this@CreateEventActivity, Locale.US)
         val addresses = geocoder.getFromLocation(coordinates.latitude, coordinates.longitude, 1)
         return hashMapOf (
             "address" to addresses[0].getAddressLine(0),
@@ -540,4 +658,119 @@ class CreateEventActivity : AppCompatActivity(), AdapterView.OnItemSelectedListe
             "subAdmin" to addresses[0].subAdminArea,
             "postalCode" to addresses[0].postalCode)
     }
+
+    private fun getCausesRefs(): ArrayList<DocumentReference> {
+        /**
+         * This gets called in [saveEventToFirestore]
+         */
+        val causesRefs : ArrayList<DocumentReference> = arrayListOf()
+
+        for (causeId in selectedCauses) {
+            causesRefs.add(db.collection("causes").document(causeId))
+        }
+
+        return causesRefs
+    }
+
+    private fun updateDatabaseWithEvent(
+        data: HashMap<String, Any?>,
+        causesRefs: ArrayList<DocumentReference>
+    ) {
+        /**
+         * This gets called in [saveEventToFirestore]
+         */
+        db.collection("events").add(data)
+            .addOnSuccessListener { eventReference ->
+                Log.d("CreateEventActivity", "Document added to firestore: $eventReference")
+
+                addEventToUserEvents(eventReference)
+                addEventToGroupsEvents(eventReference)
+                addEventToApplicableCauses(eventReference, causesRefs)
+                uploadImageToFirebaseStorage(eventReference)
+                startEventDetailsActivityWithEventId(eventReference)
+            }
+            .addOnFailureListener { e ->
+                Log.w("CreateEventActivity", "Error adding document", e)
+            }
+
+    }
+
+    private fun addEventToUserEvents(eventReference: DocumentReference) {
+        /**
+         * This gets called in [updateDatabaseWithEvent]
+         */
+        userRef.update("events", FieldValue.arrayUnion(eventReference))
+    }
+
+    private fun addEventToGroupsEvents(eventReference: DocumentReference?) {
+        /**
+         * This gets called in [updateDatabaseWithEvent]
+         */
+        if (eventOrganizerType == "group") {
+            eventOrganizer.update("events", FieldValue.arrayUnion(eventReference))
+        }
+    }
+
+    private fun addEventToApplicableCauses(
+        eventReference: DocumentReference?,
+        causesRefs: ArrayList<DocumentReference>
+    ) {
+        /**
+         * This gets called in [updateDatabaseWithEvent]
+         */
+        for (cause in causesRefs) {
+            cause.update("events", FieldValue.arrayUnion(eventReference))
+        }
+    }
+
+    private fun uploadImageToFirebaseStorage(eventRef : DocumentReference) {
+        /**
+         * This gets called in [updateDatabaseWithEvent]. The [selectedPhotoUri] has already been processed [See "Image Picker" section].
+         * It stores the file in Firebase storage, and then updates the newly-created event's "photoUrl" field with the photo's download URL
+         * for easy retrieval later on.
+         */
+        if (selectedPhotoUri == null) {
+            Log.d(TAG, "selectedPhotoUri was null so not uploaded to storage")
+            return
+        }
+
+        val filename = UUID.randomUUID().toString()
+        val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
+
+        ref.putFile(selectedPhotoUri!!)
+            .addOnSuccessListener {
+                Log.d(TAG, "Successfully uploaded image: ${it.metadata?.path}")
+
+                ref.downloadUrl.addOnSuccessListener {
+                    Log.d(TAG, "File location: $it")
+                    // this is here because there was no way to assign it.toString() to a variable that would work
+                    // update photoUrl in event
+                    eventRef.update("photoUrl", it.toString())
+                }
+            }
+            .addOnFailureListener {
+                Log.e(TAG,"There was an error adding image to firebase storage: $it")
+            }
+    }
+
+    private fun startEventDetailsActivityWithEventId(eventReference: DocumentReference?) {
+        /**
+         * This gets called in [updateDatabaseWithEvent]
+         */
+        val intent = Intent(this@CreateEventActivity, EventConfirmationActivity::class.java)
+        intent.putExtra("event_id", eventReference?.id)
+        startActivity(intent)
+    }
+
+
+    ////////////////////////////////////////////////////// MISC //////////////////////////////////////////////////
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+        TODO("Not yet implemented")
+    }
+
 }

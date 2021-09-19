@@ -1,5 +1,6 @@
 package com.sundbean.raise.ui
 
+import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -37,7 +38,7 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var organizerRef : DocumentReference
     private lateinit var eventRef : DocumentReference
     private lateinit var userRef : DocumentReference
-    private lateinit var eventDoc : DocumentSnapshot
+    private var eventDoc : DocumentSnapshot? = null
     private lateinit var eventId : String
     private var userUid : String? = null
     private var latitude : Double? = null
@@ -77,16 +78,13 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
          * and [eventRef]
          */
         eventRef = db.collection("events").document(eventId)
-        eventRef.get()
-            .addOnSuccessListener { document ->
+        eventRef
+            .addSnapshotListener { document, e ->
                 eventDoc = document
                 // sub-methods
                 prepareCoordinatesForMapDisplay()
                 fillViewsWithDataFromFirestore()
                 setClickListeners()
-            }
-            .addOnFailureListener { e ->
-                Log.d(TAG, "Error getting document reference: $e")
             }
     }
 
@@ -95,7 +93,7 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
         /**
          * Populates latitude and longitude lateinit variables. These coordinates will be used
          */
-        val location = eventDoc.get("location") as Map<*, *>
+        val location = eventDoc?.get("location") as Map<*, *>
         val coordinates = location.get("coordinates") as Map<*, Double>
         latitude = coordinates["latitude"]
         longitude = coordinates["longitude"]
@@ -120,12 +118,15 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
             if (btnRSVP.text == "RSVP") {
                 eventRef.update("attendees", FieldValue.arrayUnion(userRef))
                 userRef.update("events", FieldValue.arrayUnion(eventRef))
+                eventRef.update("rsvpNum", FieldValue.increment(1))
                 btnRSVP.text = "cancel RSVP"
             } else {
                 eventRef.update("attendees", FieldValue.arrayRemove(userRef))
                 userRef.update("events", FieldValue.arrayRemove(eventRef))
+                eventRef.update("rsvpNum", FieldValue.increment(-1))
                 btnRSVP.text = "RSVP"
             }
+            displayNumberOfAttendees()
         }
 
         llReturnToTop.setOnClickListener {
@@ -151,36 +152,50 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun retrieveOrganizerData() {
         Log.d(TAG, "I'm in retrieveOrganizerData")
-        val organizer = eventDoc.getString("organizer")!!
-        if (eventDoc.getString("organizerType") == "user") {
-            organizerRef = db.collection("users").document(organizer)
-        } else if (eventDoc.getString("organizerType") == "group") {
-            organizerRef = db.collection("groups").document(organizer)
-        } else {
-            Log.e(TAG, "Invalid organizerType: ${eventDoc.getString("organizerType")}")
-        }
+        organizerRef = eventDoc?.getDocumentReference("organizer")!!
 
+        var organizerType = eventDoc!!.getString("organizerType")
         organizerRef.get()
             .addOnSuccessListener { doc ->
-                Log.d(TAG, "Organizer document successfully retrieved: $doc")
+                Log.d(TAG, "Organizer document ${doc.id} successfully retrieved, organizer type: ${doc.getString("organizerType")}")
                 displayOrganizerTitle(doc)
                 displayOrganizerLocation(doc)
-                displayOrganizerPhoto(doc)
-                displayOrganizerAbout(doc)
+                displayOrganizerPhoto(doc, organizerType!!)
+                displayOrganizerAbout(doc, organizerType!!)
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error retrieving organizer document: $e")
             }
     }
 
-    private fun displayOrganizerAbout(doc: DocumentSnapshot?) {
+    private fun displayOrganizerAbout(doc: DocumentSnapshot?, organizerType: String) {
         if (doc != null) {
-            tvEventDetailOrganizerAbout.text = doc.getString("about")
+            if (organizerType == "user") {
+                tvEventDetailOrganizerAbout.text = doc.getString("about")
+                tvEventDetailEventOrganizerMoreLink.setOnClickListener {
+                    // TODO: Open a Profile Activity with user_id attached to intent
+                }
+
+            } else if (organizerType == "group") {
+                tvEventDetailOrganizerAbout.text = doc.getString("description")
+                tvEventDetailEventOrganizerMoreLink.setOnClickListener {
+                    val intent = Intent(this, GroupDetailsActivity::class.java)
+                    intent.putExtra("group_id", doc.id)
+                    startActivity(intent)
+                }
+            }
         }
+
+
     }
 
-    private fun displayOrganizerPhoto(doc: DocumentSnapshot?) {
-        val imgUrl = doc?.getString("photoUrl")
+    private fun displayOrganizerPhoto(doc: DocumentSnapshot?, organizerType: String) {
+        var imgUrl = ""
+        if (organizerType == "group") {
+            imgUrl = doc?.getString("logoUrl")!!
+        } else if (organizerType == "user") {
+            imgUrl = doc?.getString("photoUrl")!!
+        }
         Glide.with(this).load(imgUrl).into(ivEventDetailOrganizerImage)
     }
 
@@ -197,8 +212,8 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setRSVPButtonText() {
-        val attendees = eventDoc.get("attendees") as ArrayList<*>
-        if (userUid in attendees) {
+        val attendees = eventDoc?.get("attendees") as ArrayList<*>
+        if (userRef in attendees) {
             btnRSVP.text = "cancel RSVP"
         } else {
             btnRSVP.text = "RSVP"
@@ -206,35 +221,35 @@ class EventDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun displayEventDescription() {
-        tvGroupDetailAbout.text = eventDoc.getString("description")
+        tvGroupDetailAbout.text = eventDoc?.getString("description")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun displayEventDate() {
-        val date: String = formatDateForDisplay(eventDoc.getString("date"))
+        val date: String = formatDateForDisplay(eventDoc?.getString("date"))
         tvEventDetailDate.text = date
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun displayEventTime() {
         val startTime =
-            formatFirestoreTimeToDisplayString(eventDoc.get("startTime") as Map<String, Int?>)
+            formatFirestoreTimeToDisplayString(eventDoc?.get("startTime") as Map<String, Int?>)
         val endTime =
-            formatFirestoreTimeToDisplayString(eventDoc.get("endTime") as Map<String, Int?>)
+            formatFirestoreTimeToDisplayString(eventDoc!!.get("endTime") as Map<String, Int?>)
         tvEventDetailTime.text = "$startTime-$endTime"
     }
 
     private fun displayNumberOfAttendees() {
-        val numAttendees = eventDoc.get("rsvpNum")
+        val numAttendees = eventDoc?.get("rsvpNum")
         tvNumberOfAttendees.text = "$numAttendees going"
     }
 
     private fun displayEventTitle() {
-        tvEventDetailTitle.text = eventDoc.getString("name")
+        tvEventDetailTitle.text = eventDoc?.getString("name")
     }
 
     private fun displayImage() {
-        val imgUrl = eventDoc.getString("photoUrl")
+        val imgUrl = eventDoc?.getString("photoUrl")
         Glide.with(this).load(imgUrl)
             .override(Resources.getSystem().getDisplayMetrics().widthPixels).into(displayImageView)
     }

@@ -33,32 +33,32 @@ class EventConfirmationActivity : AppCompatActivity() {
     private fun displayEventInfo(eventId : String) {
         val db = Firebase.firestore
 
-        val eventRef = db.collection("events").document(eventId)
-        eventRef.get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    Log.d(TAG, "Document data: ${document.data}")
-                    tvEventType.text = document.getString("type")
-                    tvEventName.text = document.getString("name")
-                    // get the user
-                    val userId = document.getString("organizer") as String
-                    val userRef = db.collection("users").document(userId)
-                    userRef.get().addOnSuccessListener { userDoc ->
-                        tvEventOrganizer.text = userDoc.getString("name")
-                    }
-                    tvEventDate.text = document.getString("date")
-                    tvEventTime.text = document.getString("time")
-                    tvEventDescription.text = document.getString("description")
-//                    tvEventLocation.text = document.getString("location")
-                    // I've commented this part out because there's a timing issue here. This activity executes before Firebase has had a chance to
-                    // store the image and assign an image url to the field in the new event's document. Either I'll havee to leave the image out, or
-                    // find a way to "delay" the start of this activity for 1-2 seconds (to be coded in previous CreateEventActivity)
-                    Handler(getMainLooper()).postDelayed({
-                        var imageUrl = document.getString("photoUrl")
-                        Log.d(TAG, "imageUrl is equal to: $imageUrl")
-                        setImageInImageView(imageUrl)
-                    }, 1000)
-                }
+//        val eventRef = db.collection("events").document(eventId)
+//        eventRef.get()
+//            .addOnSuccessListener { document ->
+//                if (document != null) {
+//                    Log.d(TAG, "Document data: ${document.data}")
+//                    tvEventType.text = document.getString("type")
+//                    tvEventName.text = document.getString("name")
+//                    // get the user
+//                    val userId = document.getString("organizer") as String
+//                    val userRef = db.collection("users").document(userId)
+//                    userRef.get().addOnSuccessListener { userDoc ->
+//                        tvEventOrganizer.text = userDoc.getString("name")
+//                    }
+//                    tvEventDate.text = document.getString("date")
+//                    tvEventTime.text = document.getString("time")
+//                    tvEventDescription.text = document.getString("description")
+////                    tvEventLocation.text = document.getString("location")
+//                    // I've commented this part out because there's a timing issue here. This activity executes before Firebase has had a chance to
+//                    // store the image and assign an image url to the field in the new event's document. Either I'll havee to leave the image out, or
+//                    // find a way to "delay" the start of this activity for 1-2 seconds (to be coded in previous CreateEventActivity)
+//                    Handler(getMainLooper()).postDelayed({
+//                        var imageUrl = document.getString("photoUrl")
+//                        Log.d(TAG, "imageUrl is equal to: $imageUrl")
+//                        setImageInImageView(imageUrl)
+//                    }, 1000)
+//                }
 
                 btnGoToEventDetail.setOnClickListener {
                     val intent =
@@ -76,8 +76,7 @@ class EventConfirmationActivity : AppCompatActivity() {
             }
         }
 
-    private fun setImageInImageView(imageUrl : String?) {
-        Log.d(TAG, "Image url is $imageUrl")
-        Glide.with(this).load(imageUrl).override(Resources.getSystem().getDisplayMetrics().widthPixels).into(ivEventPhotoC)
-    }
-}
+//    private fun setImageInImageView(imageUrl : String?) {
+//        Log.d(TAG, "Image url is $imageUrl")
+//        Glide.with(this).load(imageUrl).override(Resources.getSystem().getDisplayMetrics().widthPixels).into(ivEventPhotoC)
+//    }

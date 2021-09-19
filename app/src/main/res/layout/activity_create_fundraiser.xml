@@ -58,7 +58,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        app:srcCompat="@drawable/ic_upload_white_foreground" />
+                        app:tint="@color/white"
+                        app:srcCompat="@mipmap/ic_upload_gf_foreground" />
 
                     <TextView
                         android:id="@+id/tvUploadTextCF"
